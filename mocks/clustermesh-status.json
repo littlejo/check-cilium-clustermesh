@@ -1,0 +1,97 @@
+{
+ "access_information": {
+  "service_type": "NodePort",
+  "service_ips": [
+   "172.31.143.170"
+  ],
+  "service_port": 32379,
+  "cluster_id": "1",
+  "cluster_name": "cmesh1",
+  "ca": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURFekNDQWZ1Z0F3SUJBZ0lRRDRuaVhpYmFISEw5NVdyZm83UTlPakFOQmdrcWhraUc5dzBCQVFzRkFEQVUKTVJJd0VBWURWUVFERXdsRGFXeHBkVzBnUTBFd0hoY05NalF4TURBME1UTXlNRFEwV2hjTk1qY3hNREEwTVRNeQpNRFEwV2pBVU1SSXdFQVlEVlFRREV3bERhV3hwZFcwZ1EwRXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCCkR3QXdnZ0VLQW9JQkFRREZ4RGhteFM3UitHbEhDRFFhd2wwVUVJMlVtY0xFSitLditCMmd0M2xDMnU4TkdsUkkKVFRpWk9yVFkrbnJZZVJsd1QyVHZ3Q1VwRm8xait6RWlXMVlucmU1MmFsMnBvUXdET295aW5nYnJxbXA4elNQQgp1M3M5OXpONGNwQys0dStiWGVmb0xvQURoYXFlZ3MrRnZDNGlBVWJSeUNSZDFac1N2WVYzQWZCVVhIUFlnUVBnCnNzSno1dElCdVp5Rkp5b1Rha0p4VHd3ejQrVlVmbkI2dlRnMjFKbmtzT1MxSkdLc2F6MzNuSkpIVUxHYmxkQm0KdUM4V3N0aUtadDBMVlRoYXJxdG5RcXg2MXZZdlRVS3ZxZlA1Q2RJZHlPR252RnIrc21oV2VDcHBkRXNuN21mYgowNTgrUlZhR0RWdlZIUmQ1b09CUGNmeEM0UWVjMFMva0QrUjlBZ01CQUFHallUQmZNQTRHQTFVZER3RUIvd1FFCkF3SUNwREFkQmdOVkhTVUVGakFVQmdnckJnRUZCUWNEQVFZSUt3WUJCUVVIQXdJd0R3WURWUjBUQVFIL0JBVXcKQXdFQi96QWRCZ05WSFE0RUZnUVV5VG81NnRhZ0ovVnFEV3VzTHVRUEppYXBqOVV3RFFZSktvWklodmNOQVFFTApCUUFEZ2dFQkFBWllrYXRzQmJSYTZPS0tSYUxITjB1VjJBdjJteGRYcytsSElYNmEySVV5Uzk3WVgyR3Z5L1d0CmdtOXU0WS82QTdJdzZGdkQ3b3JKMWZ6NnhFSlNEWFBveTJNbUx5MTE3elNNeUNmTjNSOVU2UjdYaUhHUmYySW4KdHBqaUNnYTFDVFVTVE5FR1UzTENBVnNXcUdMWGVrVDEzVmZmanRHbi9mdmdpbEsxbGdla1dzLzMxSjkzdHRNOQp0QnhnTC9OT0V2d0p3OW9NRnIrV3Z1ejlKb3hhellNRnBkaE5OWFMwUnFtOEhQVHFBYzNtWGJxOW94c3lsUVJCCm13UHREbndFTEVFOHdGSlpOWUszU0JQcHROQm5paTlZcVkySTVsdXdnMGFtSWp3bkt1aVU0YTBpV2pNRG1XM3kKWFhUVmcrck5oQ1dabDR1KzNYemxDZVhFaEQrTEhCND0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=",
+  "client_cert": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNYVENDQVVXZ0F3SUJBZ0lVQnB1T3p6U2luVDZDUFFrV0F3Zkd4K2U5QlJBd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0ZERVNNQkFHQTFVRUF4TUpRMmxzYVhWdElFTkJNQjRYRFRJME1UQXdOREV6TVRrd01Gb1hEVEkzTVRBdwpOREV6TVRrd01Gb3dFVEVQTUEwR0ExVUVBeE1HY21WdGIzUmxNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBECkFRY0RRZ0FFMVQ4QndOOHBxL0pxd0dpRFBWbEs2WkFDTGtvOFpuY3UraFVNNmdETVAwQy9NMDNCV0p0UkJMdysKY1lyK0xYN21DMlBCSVYwczFtK2ZHUXZMTVR2SXpLTjFNSE13RGdZRFZSMFBBUUgvQkFRREFnV2dNQk1HQTFVZApKUVFNTUFvR0NDc0dBUVVGQndNQ01Bd0dBMVVkRXdFQi93UUNNQUF3SFFZRFZSME9CQllFRkFsYTRMNFcyVUs2CjR2QmpiZFg2ajNTVnJtUE9NQjhHQTFVZEl3UVlNQmFBRk1rNk9lcldvQ2YxYWcxcnJDN2tEeVltcVkvVk1BMEcKQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUFncWdreFhhNG9JRzJwY1pNUHdvWWNzTXZ4UkdUZWVlc0h6ZDdqZk12aQpzRmpOMk14YkNWWnZianlJQlc4Q2ZJcTRrVURodU5aVWw2enAxWjNuNERkT0owV2JJQkNJYnlSdFNCUGRrQy9PCkFacUZ3VS9uSld6K1A4SUgvc3k4ZDNGT0ZaNVRkeU5DTXdFb1J6QnhwOFJ3M1hmTHN2NFRkQ0dOWklGYWxRUlQKaWFCbmdyVXQxZzNoNTlQZTVEMXBXU3djTkZKaE1WYVZ1QmNnVXZ5QnBaT1FzSmoyWG52bjFiVkZ2NHN0dFpqbwoxdms0Skg2RHBYam9DUzZGUFZvaXRQZjI0dHdycGVnRW1ENXVIUDN4YXFzQmtPMi9iVDEvN21BdGYrR0VKaVpiCmFDU2dMeHZGRWNMWEo5S1ExeHZYSmYra3Boamp2dGpVWWE2Z1gwWHV6NU5rCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K",
+  "client_key": "LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUZYNFRoRTh6Qmh6S3dPL0diMlpML3NYLzhKUFRTWkIxdTZybDRoVnFEVFFvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFMVQ4QndOOHBxL0pxd0dpRFBWbEs2WkFDTGtvOFpuY3UraFVNNmdETVAwQy9NMDNCV0p0UgpCTHcrY1lyK0xYN21DMlBCSVYwczFtK2ZHUXZMTVR2SXpBPT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=",
+  "tunnel": "vxlan",
+  "max_connected_clusters": 255
+ },
+ "connectivity": {
+  "global_services": {},
+  "connected": {
+   "min": 7,
+   "avg": 7,
+   "max": 7
+  },
+  "clusters": {
+   "cmesh2": {
+    "configured": 1,
+    "connected": 1
+   },
+   "cmesh3": {
+    "configured": 1,
+    "connected": 1
+   },
+   "cmesh4": {
+    "configured": 1,
+    "connected": 1
+   },
+   "cmesh5": {
+    "configured": 1,
+    "connected": 1
+   },
+   "cmesh6": {
+    "configured": 1,
+    "connected": 1
+   },
+   "cmesh7": {
+    "configured": 1,
+    "connected": 1
+   },
+   "cmesh8": {
+    "configured": 1,
+    "connected": 1
+   }
+  },
+  "total": 1
+ },
+ "kvstoremesh": {
+  "enabled": true,
+  "status": {
+   "global_services": {},
+   "connected": {
+    "min": 7,
+    "avg": 7,
+    "max": 7
+   },
+   "clusters": {
+    "cmesh2": {
+     "configured": 1,
+     "connected": 1
+    },
+    "cmesh3": {
+     "configured": 1,
+     "connected": 1
+    },
+    "cmesh4": {
+     "configured": 1,
+     "connected": 1
+    },
+    "cmesh5": {
+     "configured": 1,
+     "connected": 1
+    },
+    "cmesh6": {
+     "configured": 1,
+     "connected": 1
+    },
+    "cmesh7": {
+     "configured": 1,
+     "connected": 1
+    },
+    "cmesh8": {
+     "configured": 1,
+     "connected": 1
+    }
+   },
+   "total": 1
+  }
+ }
+}
