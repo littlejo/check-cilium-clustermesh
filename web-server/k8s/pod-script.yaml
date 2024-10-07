@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: script-runner
+spec:
+  containers:
+  - name: script-container
+    image: curlimages/curl
+    command: ["/bin/sh", "-c", "cp /scripts/check-global-services.sh /tmp && chmod +x /tmp/check-global-services.sh && /tmp/check-global-services.sh"]
+    envFrom:
+      - configMapRef:
+          name: cluster
+    volumeMounts:
+    - name: script-volume
+      mountPath: /scripts
+  volumes:
+  - name: script-volume
+    configMap:
+      name: check-global-services

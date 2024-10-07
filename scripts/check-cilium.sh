@@ -4,7 +4,7 @@ export KUBECONFIG=./kubeconfig.yaml
 ctx = "/tmp/contexts"
 
 kubectl config get-contexts -o name > $ctx
-clusters_n=$(cat $ctx | wc -l)
+clusters_n=$(cat $ctx | wc -l | awk '{print $1}')
 
 for c in $(cat $ctx)
 do
