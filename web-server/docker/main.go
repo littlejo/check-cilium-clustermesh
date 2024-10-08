@@ -12,7 +12,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		message = "Default Message"
 	}
 
-	fmt.Fprintf(w, "%s", message)
+	fmt.Fprintf(w, "%s\n", message)
 }
 
 func main() {
