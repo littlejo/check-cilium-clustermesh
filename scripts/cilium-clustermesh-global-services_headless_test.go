@@ -74,7 +74,7 @@ func TestCiliumClusterMeshGlobalServiceHeadless(t *testing.T) {
 		lib.CreateFile(fmt.Sprintf("/tmp/runner-headless-%s.log", c), logs)
 		numberOfLines := strings.Count(logs, "\n") + 1
 		require.Equal(t, numberOfLines, 1)
-		require.Contains(t, logs, "101")
+		require.Contains(t, logs, "100")
 		require.Contains(t, logs, contexts[0])
 	}
 }
