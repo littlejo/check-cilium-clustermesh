@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: check-global-services
+data:
+  check-global-services.sh: |
+    svc_name=go-web-server-pod
+    connect=100
+
+    touch /tmp/clusters
+
+    while ! cat /tmp/clusters | uniq -c | awk '{print $1}' | grep -q "^${connect}$"
+    do
+      curl http://$svc_name:8080 2> /dev/null >> /tmp/clusters
+      sleep 0.1
+    done
+
+    cat /tmp/clusters | sort | uniq -c
+    sleep 1000000
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: script-runner
+spec:
+  containers:
+  - name: script-container
+    image: quay.io/cilium/alpine-curl:v1.10.0
+    command: ["/bin/sh", "-c", "cp /scripts/check-global-services.sh /tmp && chmod +x /tmp/check-global-services.sh && /tmp/check-global-services.sh"]
+    envFrom:
+      - configMapRef:
+          name: cluster
+    volumeMounts:
+    - name: script-volume
+      mountPath: /scripts
+  volumes:
+  - name: script-volume
+    configMap:
+      name: check-global-services
