@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-ctx = "/tmp/contexts"
+ctx="/tmp/contexts"
 
 kubectl config get-contexts -o name > $ctx
 clusters_n=$(cat $ctx | wc -l | awk '{print $1}')
