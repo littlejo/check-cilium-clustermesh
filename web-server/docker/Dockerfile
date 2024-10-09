@@ -5,7 +5,7 @@ FROM golang:alpine AS builder
 WORKDIR /app
 
 # Copie le fichier source Go dans l'image
-COPY ./main.go .
+COPY ./main.go ./go.mod .
 
 # Compile l'application en un binaire statique
 RUN go build -o server .
