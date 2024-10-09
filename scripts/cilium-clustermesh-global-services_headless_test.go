@@ -71,10 +71,10 @@ func TestCiliumClusterMeshGlobalServiceHeadless(t *testing.T) {
 		lib.WaitForPodLogs(t, options, podName, containerName, cluster_number, time.Duration(10)*time.Second)
 		logs := k8s.GetPodLogs(t, options, pods, containerName)
 		t.Log("Value of logs is:", logs)
-		lib.CreateFile(fmt.Sprintf("/tmp/runner-%s.log", c), logs)
+		lib.CreateFile(fmt.Sprintf("/tmp/runner-headless-%s.log", c), logs)
 		numberOfLines := strings.Count(logs, "\n") + 1
 		require.Equal(t, numberOfLines, 1)
-		require.Contains(t, logs, "100")
+		require.Contains(t, logs, "101")
 		require.Contains(t, logs, contexts[0])
 	}
 }
