@@ -8,7 +8,6 @@ WORKDIR /app
 COPY ./main.go .
 
 # Compile l'application en un binaire statique
-RUN go mod init app
 RUN go build -o server .
 
 # Étape 2 : Créer une image minimale pour exécuter le binaire
