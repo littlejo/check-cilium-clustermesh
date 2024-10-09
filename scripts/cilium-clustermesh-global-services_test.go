@@ -73,5 +73,6 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 		lib.CreateFile(fmt.Sprintf("/tmp/runner-%s.log", c), logs)
 		numberOfLines := strings.Count(logs, "\n") + 1
 		require.Equal(t, numberOfLines, cluster_number)
+		require.Contains(t, logs, contexts)
 	}
 }
