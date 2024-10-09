@@ -131,6 +131,11 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 	}
 
 	for _, c := range contexts {
+		options := k8s.NewKubectlOptions(c, "", namespaceName)
+		k8s.WaitUntilPodAvailable(t, options, "go-web-server-pod", 10, time.Duration(2)*time.Second)
+	}
+
+	for _, c := range contexts {
 		clientResourcePath, err := filepath.Abs("../web-server/k8s/pod-script.yaml")
 		require.NoError(t, err)
 
