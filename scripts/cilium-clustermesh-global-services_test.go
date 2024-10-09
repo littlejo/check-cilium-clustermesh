@@ -1,7 +1,7 @@
 package test
 
-//go test -v cilium-clustermesh-global-services.go
-//go test -c -o test-binary cilium-clustermesh-global-services.go
+//go test -v cilium-clustermesh-global-services_test.go
+//go test -c -o test-binary cilium-clustermesh-global-services_test.go
 //./test-binary -test.v
 
 import (
@@ -118,7 +118,6 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 		cm := CreateConfigMapFile(cluster_number, c)
 		cmResourcePath, err := filepath.Abs(cm)
 		webResourcePath, err := filepath.Abs("../web-server/k8s/pod-svc.yaml")
-		clientResourcePath, err := filepath.Abs("../web-server/k8s/pod-script.yaml")
 		require.NoError(t, err)
 
 		options := k8s.NewKubectlOptions(c, "", namespaceName)
@@ -126,10 +125,19 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 		k8s.CreateNamespace(t, options, namespaceName)
 		defer k8s.DeleteNamespace(t, options, namespaceName)
 		defer k8s.KubectlDelete(t, options, webResourcePath)
-		defer k8s.KubectlDelete(t, options, clientResourcePath)
 
 		k8s.KubectlApply(t, options, cmResourcePath)
 		k8s.KubectlApply(t, options, webResourcePath)
+	}
+
+	for _, c := range contexts {
+		clientResourcePath, err := filepath.Abs("../web-server/k8s/pod-script.yaml")
+		require.NoError(t, err)
+
+		options := k8s.NewKubectlOptions(c, "", namespaceName)
+
+		defer k8s.KubectlDelete(t, options, clientResourcePath)
+
 		k8s.KubectlApply(t, options, clientResourcePath)
 	}
 
