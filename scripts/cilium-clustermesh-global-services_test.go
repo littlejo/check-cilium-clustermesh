@@ -130,10 +130,8 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 		k8s.KubectlApply(t, options, webResourcePath)
 	}
 
-	for _, c := range contexts {
-		options := k8s.NewKubectlOptions(c, "", namespaceName)
-		k8s.WaitUntilPodAvailable(t, options, "go-web-server-pod", 10, time.Duration(2)*time.Second)
-	}
+	options := k8s.NewKubectlOptions(contexts[len(contexts)-1], "", namespaceName)
+	k8s.WaitUntilPodAvailable(t, options, "go-web-server-pod", 60, time.Duration(1)*time.Second)
 
 	for _, c := range contexts {
 		clientResourcePath, err := filepath.Abs("../web-server/k8s/pod-script.yaml")
@@ -149,7 +147,7 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 	for _, c := range contexts {
 		options := k8s.NewKubectlOptions(c, "", namespaceName)
 		pods := k8s.GetPod(t, options, podName)
-		k8s.WaitUntilPodAvailable(t, options, podName, 10, time.Duration(10)*time.Second)
+		k8s.WaitUntilPodAvailable(t, options, podName, 60, time.Duration(1)*time.Second)
 		WaitForPodLogs(t, options, podName, containerName, cluster_number, time.Duration(10)*time.Second)
 		logs := k8s.GetPodLogs(t, options, pods, containerName)
 		t.Log("Value of logs is:", logs)
