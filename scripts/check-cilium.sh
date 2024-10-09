@@ -1,6 +1,5 @@
 #!/usr/bin/bash
 
-export KUBECONFIG=./kubeconfig.yaml
 ctx = "/tmp/contexts"
 
 kubectl config get-contexts -o name > $ctx
@@ -21,7 +20,7 @@ do
 done
 
 #TOFIX odd number
-cat $ctx | xargs -n 2 -P 4 bash -c 'cilium connectivity test --context $0 --multi-cluster $1 | tee /tmp/$0-$1-connectivity-test.log'
-
-#TOFIX odd number
-cat $ctx | xargs -P 4 bash -c 'cilium sysdump --output-filename $0 --context $0'
+#cat $ctx | xargs -n 2 -P 4 bash -c 'cilium connectivity test --context $0 --multi-cluster $1 | tee /tmp/$0-$1-connectivity-test.log'
+#
+##TOFIX odd number
+#cat $ctx | xargs -P 4 bash -c 'cilium sysdump --output-filename $0 --context $0'
