@@ -124,7 +124,7 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 
 		k8s.CreateNamespace(t, options, namespaceName)
 		defer k8s.DeleteNamespace(t, options, namespaceName)
-		defer k8s.KubectlDelete(t, options, webResourcePath)
+		//defer k8s.KubectlDelete(t, options, webResourcePath)
 
 		k8s.KubectlApply(t, options, cmResourcePath)
 		k8s.KubectlApply(t, options, webResourcePath)
@@ -139,7 +139,7 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 
 		options := k8s.NewKubectlOptions(c, "", namespaceName)
 
-		defer k8s.KubectlDelete(t, options, clientResourcePath)
+		//defer k8s.KubectlDelete(t, options, clientResourcePath)
 
 		k8s.KubectlApply(t, options, clientResourcePath)
 	}
