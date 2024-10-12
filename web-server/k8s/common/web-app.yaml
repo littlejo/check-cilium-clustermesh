@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+  labels:
+    app: web-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-app
+  template:
+    metadata:
+      labels:
+        app: web-app
+    spec:
+      containers:
+        - name: go-web-server
+          image: ttl.sh/littlejo-webapp:2h
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: cluster
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.cilium.io/global: "true"
+  labels:
+    app: web-app
+  name: web-app
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: web-app
+  type: ClusterIP
