@@ -4,7 +4,7 @@ metadata:
   name: check-global-services
 data:
   check-global-services.sh: |
-    svc_name=go-web-server-pod
+    svc_name=web-app
     connect=100
 
     touch /tmp/clusters

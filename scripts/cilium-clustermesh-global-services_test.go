@@ -71,9 +71,8 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 		}
 		k8s.WaitUntilDeploymentAvailable(t, options, deploymentName, 60, time.Duration(1)*time.Second)
 		pod := k8s.ListPods(t, options, filters)[0]
-		p := k8s.GetPod(t, options, pod.Name)
 		lib.WaitForPodLogs(t, options, pod.Name, containerName, cluster_number, time.Duration(10)*time.Second)
-		logs := k8s.GetPodLogs(t, options, p, containerName)
+		logs := k8s.GetPodLogs(t, options, &pod, containerName)
 		t.Log("Value of pod name is:", pod.Name)
 		t.Log("Value of logs is:", logs)
 		lib.CreateFile(fmt.Sprintf("/tmp/client-%s.log", c), logs)
