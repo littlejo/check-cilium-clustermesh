@@ -4,8 +4,8 @@ metadata:
   annotations:
     service.cilium.io/global: "true"
   labels:
-    app: go-web-server-pod
-  name: go-web-server-pod
+    app: web-app
+  name: web-app
 spec:
   ports:
   - port: 8080
