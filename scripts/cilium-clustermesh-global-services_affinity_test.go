@@ -53,7 +53,7 @@ func TestCiliumClusterMeshGlobalServiceAffinity(t *testing.T) {
 	k8s.WaitUntilDeploymentAvailable(t, options, "web-app", 60, time.Duration(1)*time.Second)
 
 	for _, c := range contexts {
-		clientResourcePath, err := filepath.Abs("../web-server/k8s/global-load-balancing/client.yaml")
+		clientResourcePath, err := filepath.Abs("../web-server/k8s/global-load-balancing-affinity/client.yaml")
 		require.NoError(t, err)
 
 		options := k8s.NewKubectlOptions(c, "", namespaceName)
