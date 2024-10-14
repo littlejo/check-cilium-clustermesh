@@ -15,7 +15,6 @@ data:
       sleep 0.1
     done
 
-    cat /tmp/clusters | sort | uniq -c
     sleep 1000000
 
 ---
