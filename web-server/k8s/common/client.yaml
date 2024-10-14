@@ -32,9 +32,6 @@ spec:
       - name: client
         image: quay.io/cilium/alpine-curl:v1.10.0
         command: ["/bin/sh", "-c", "cp /scripts/check-global-services.sh /tmp && chmod +x /tmp/check-global-services.sh && /tmp/check-global-services.sh"]
-        envFrom:
-          - configMapRef:
-              name: cluster
         volumeMounts:
         - name: script-volume
           mountPath: /scripts
