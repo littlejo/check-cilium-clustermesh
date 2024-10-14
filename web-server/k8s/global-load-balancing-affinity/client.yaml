@@ -11,7 +11,7 @@ data:
 
     while ! cat /tmp/clusters | sort | uniq | wc -l | awk '{print $1}' | grep -q "^${clusters}$"
     do
-      curl http://$svc_name:8080 2> /dev/null | tee -a /tmp/clusters
+      curl http://$svc_name:8080 2> /dev/null
       sleep 0.1
     done
 
