@@ -15,9 +15,8 @@ data:
       sleep 0.1
     done
 
-    sleep 1000000
-
     cat /tmp/clusters | sort | uniq -c
+    sleep 1000000
 ---
 apiVersion: apps/v1
 kind: Deployment
