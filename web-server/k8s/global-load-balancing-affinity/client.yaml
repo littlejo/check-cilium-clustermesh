@@ -5,17 +5,13 @@ metadata:
 data:
   check-global-services.sh: |
     svc_name=web-app
-    clusters=$CLUSTERS_NUMBER
+    interval=0.1
 
-    touch /tmp/clusters
-
-    while ! cat /tmp/clusters | sort | uniq | wc -l | awk '{print $1}' | grep -q "^${clusters}$"
+    while true
     do
       curl http://$svc_name:8080 2> /dev/null
-      sleep 0.1
+      sleep $interval
     done
-
-    sleep 50000
 
 ---
 apiVersion: apps/v1
