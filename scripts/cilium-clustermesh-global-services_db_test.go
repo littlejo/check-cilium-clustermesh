@@ -35,8 +35,7 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 
 	for i, c := range contexts {
-		cm := lib.CreateConfigMapFile(cluster_number, c)
-		cmResourcePath, err := filepath.Abs(cm)
+		cm := lib.CreateConfigMapString(cluster_number, c)
 		file_web := "../web-server/k8s/global-database/global-svc.yaml"
 		if i == 0 {
 			file_web = "../web-server/k8s/common/web-app.yaml"
@@ -50,7 +49,7 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 		defer k8s.DeleteNamespace(t, options, namespaceName)
 		defer k8s.KubectlDelete(t, options, webResourcePath)
 
-		k8s.KubectlApply(t, options, cmResourcePath)
+		k8s.KubectlApplyFromString(t, options, cm)
 		k8s.KubectlApply(t, options, webResourcePath)
 	}
 
