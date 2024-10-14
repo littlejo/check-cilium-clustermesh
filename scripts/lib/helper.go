@@ -72,6 +72,39 @@ func WaitForPodLogs(t *testing.T, options *k8s.KubectlOptions, podName string, c
 	return "", fmt.Errorf("Impossible to retrieve after %d tries", maxRetries)
 }
 
+func WaitForPodAllClustersLogs(t *testing.T, options *k8s.KubectlOptions, podName string, containerName string, contexts []string, maxRetries int, retryInterval time.Duration) (string, error) {
+	var logs string
+	pods := k8s.GetPod(t, options, podName)
+
+	for i := 0; i < maxRetries; i++ {
+		logs = k8s.GetPodLogs(t, options, pods, containerName)
+		logsList := strings.Split(logs, "\n")
+		allPresent := true
+		for _, log := range logsList {
+			if !contains(contexts, log) {
+				allPresent = false
+			}
+		}
+
+		if allPresent {
+			return logs, nil
+		}
+
+		time.Sleep(retryInterval)
+	}
+
+	return "", fmt.Errorf("Impossible to retrieve after %d tries", maxRetries)
+}
+
+func contains(list []string, item string) bool {
+	for _, v := range list {
+		if v == item {
+			return true
+		}
+	}
+	return false
+}
+
 func GetKubeContexts(t *testing.T) ([]string, error) {
 	kubectlCmd := shell.Command{
 		Command: "kubectl",
