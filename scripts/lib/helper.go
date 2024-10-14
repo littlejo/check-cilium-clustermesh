@@ -80,8 +80,8 @@ func WaitForPodAllClustersLogs(t *testing.T, options *k8s.KubectlOptions, podNam
 		logs = k8s.GetPodLogs(t, options, pods, containerName)
 		logsList := strings.Split(logs, "\n")
 		allPresent := true
-		for _, log := range logsList {
-			if !contains(contexts, log) {
+		for _, c := range contexts {
+			if !contains(logsList, c) {
 				allPresent = false
 			}
 		}
