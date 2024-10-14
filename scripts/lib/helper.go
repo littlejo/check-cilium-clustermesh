@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"strings"
@@ -12,8 +13,7 @@ import (
 	"github.com/gruntwork-io/terratest/modules/shell"
 )
 
-func CreateConfigMapFile(n int, name string) string {
-	file := fmt.Sprintf("/tmp/cm-%s.yaml", name)
+func CreateConfigMapString(n int, name string) string {
 	tmpl := `apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -30,19 +30,14 @@ data:
 		ClustersNumber: n,
 	}
 
-	outputFile, err := os.Create(file)
-	if err != nil {
-		panic(err)
-	}
-	defer outputFile.Close()
-
+	var result bytes.Buffer
 	t := template.Must(template.New("configMap").Parse(tmpl))
-	err = t.Execute(outputFile, data)
+	err := t.Execute(&result, data)
 	if err != nil {
 		panic(err)
 	}
 
-	return file
+	return result.String()
 }
 
 func CreateFile(fileName string, content string) error {
