@@ -94,6 +94,7 @@ func TestCiliumClusterMeshGlobalServiceAffinity(t *testing.T) {
 		logs := k8s.GetPodLogs(t, options, &pod, containerName)
 		logsList := strings.Split(logs, "\n")
 		contextsAnalyze := contexts
+		lib.CreateFile(fmt.Sprintf("/tmp/client-affinity-%s.log", c), logs)
 		if i != 0 {
 			contextsAnalyze = []string{c}
 		}
@@ -102,6 +103,5 @@ func TestCiliumClusterMeshGlobalServiceAffinity(t *testing.T) {
 		}
 		t.Log("Value of pod name is:", pod.Name)
 		t.Log("Value of logs is:", logs)
-		lib.CreateFile(fmt.Sprintf("/tmp/client-affinity-%s.log", c), logs)
 	}
 }
