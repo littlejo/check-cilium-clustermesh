@@ -28,14 +28,14 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 		fmt.Println(err)
 		return
 	}
-	cluster_number := len(contexts)
+	clusterNumber := len(contexts)
 	deploymentName := "client"
 	containerName := "client"
 
 	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 
 	for _, c := range contexts {
-		cm := lib.CreateConfigMapString(cluster_number, c)
+		cm := lib.CreateConfigMapString(clusterNumber, c)
 		webResourcePath, err := filepath.Abs("../web-server/k8s/common/web-app.yaml")
 		require.NoError(t, err)
 
