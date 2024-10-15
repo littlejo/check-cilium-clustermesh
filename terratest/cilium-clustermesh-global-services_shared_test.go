@@ -91,15 +91,19 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	webResourceSwitchPath, err = filepath.Abs(webSwitchPath)
 	k8s.KubectlApply(t, options, webResourceSwitchPath)
 
+	waitContexts := []string{contexts[0], contexts[len(contexts)-1]}
+
 	filters := metav1.ListOptions{
 		LabelSelector: "app=client",
 	}
+
 	pod := k8s.ListPods(t, options, filters)[0]
 
-	waitContexts := []string{contexts[0], contexts[len(contexts)-1]}
-
 	lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, waitContexts, clusterNumber, time.Duration(10)*time.Second)
-	lib.WaitForPodAllClustersLogs(t, k8s.NewKubectlOptions(contexts[0], "", namespaceName), pod.Name, containerName, waitContexts, clusterNumber, time.Duration(10)*time.Second)
+
+	options = k8s.NewKubectlOptions(contexts[0], "", namespaceName)
+	pod = k8s.ListPods(t, options, filters)[0]
+	lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, waitContexts, clusterNumber, time.Duration(10)*time.Second)
 
 	for _, c := range contexts {
 		options := k8s.NewKubectlOptions(c, "", namespaceName)
