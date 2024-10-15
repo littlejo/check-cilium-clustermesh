@@ -57,7 +57,7 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		k8s.KubectlApply(t, options, webResourcePath)
 	}
 
-	options := k8s.NewKubectlOptions(contexts[len(contexts)-1], "", namespaceName)
+	options := k8s.NewKubectlOptions(green, "", namespaceName)
 	k8s.WaitUntilDeploymentAvailable(t, options, "web-app", 60, time.Duration(1)*time.Second)
 
 	for _, c := range contexts {
@@ -91,17 +91,17 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		}
 	}
 
-	options = k8s.NewKubectlOptions(contexts[0], "", namespaceName)
+	options = k8s.NewKubectlOptions(blue, "", namespaceName)
 	webSwitchPath := "../web-server/k8s/global-database-shared/web-app-shared-false.yaml"
 	webResourceSwitchPath, err := filepath.Abs(webSwitchPath)
 	k8s.KubectlApply(t, options, webResourceSwitchPath)
 
-	options = k8s.NewKubectlOptions(contexts[len(contexts)-1], "", namespaceName)
+	options = k8s.NewKubectlOptions(green, "", namespaceName)
 	webSwitchPath = "../web-server/k8s/global-database-shared/web-app-shared.yaml"
 	webResourceSwitchPath, err = filepath.Abs(webSwitchPath)
 	k8s.KubectlApply(t, options, webResourceSwitchPath)
 
-	waitContexts := []string{contexts[0], contexts[len(contexts)-1]}
+	waitContexts := []string{blue, green}
 
 	filters := metav1.ListOptions{
 		LabelSelector: "app=client",
@@ -121,11 +121,8 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		pod := k8s.ListPods(t, options, filters)[0]
 		logs := k8s.GetPodLogs(t, options, &pod, containerName)
 		logsList := strings.Split(logs, "\n")
-		contextsAnalyze := []string{contexts[0], contexts[len(contexts)-1]}
+		contextsAnalyze := []string{blue, green}
 		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-%s.log", c), logs)
-		//if i == 0 || i == len(contexts)-1{
-		//	contextsAnalyze = []string{contexts[0], contexts[len(contexts)-1]}
-		//}
 		for _, c := range contextsAnalyze {
 			require.Contains(t, logsList, c)
 		}
