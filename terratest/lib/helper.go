@@ -40,6 +40,41 @@ data:
 	return result.String()
 }
 
+func CreateCiliumNetworkPolicyString(endpointClusterName string, ingressClusterName string) string {
+	tmpl := `apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "allow-green-access-blue"
+spec:
+  description: "Allow client in cmesh2 to contact web-app in cmesh0"
+  endpointSelector:
+    matchLabels:
+      app: web-app
+      io.cilium.k8s.policy.cluster: {{.EndpointClusterName}}
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: client
+        io.cilium.k8s.policy.cluster: {{.IngressClusterName}}`
+
+	data := struct {
+		EndpointClusterName string
+		IngressClusterName  string
+	}{
+		EndpointClusterName: endpointClusterName,
+		IngressClusterName:  ingressClusterName,
+	}
+
+	var result bytes.Buffer
+	t := template.Must(template.New("ciliumNetworkPolicy").Parse(tmpl))
+	err := t.Execute(&result, data)
+	if err != nil {
+		panic(err)
+	}
+
+	return result.String()
+}
+
 func CreateFile(fileName string, content string) error {
 	file, err := os.Create(fileName)
 	if err != nil {
