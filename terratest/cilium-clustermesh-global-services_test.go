@@ -53,7 +53,7 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 	k8s.WaitUntilDeploymentAvailable(t, options, "web-app", 60, time.Duration(1)*time.Second)
 
 	for _, c := range contexts {
-		clientResourcePath, err := filepath.Abs("../web-server/k8s/global-load-balancing/client.yaml")
+		clientResourcePath, err := filepath.Abs("../web-server/k8s/common/client.yaml")
 		require.NoError(t, err)
 
 		options := k8s.NewKubectlOptions(c, "", namespaceName)
@@ -70,15 +70,14 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 		}
 		k8s.WaitUntilDeploymentAvailable(t, options, deploymentName, 60, time.Duration(1)*time.Second)
 		pod := k8s.ListPods(t, options, filters)[0]
-		lib.WaitForPodLogs(t, options, pod.Name, containerName, cluster_number, time.Duration(10)*time.Second)
+		lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, contexts, clusterNumber, time.Duration(10)*time.Second)
 		logs := k8s.GetPodLogs(t, options, &pod, containerName)
+		logsList := strings.Split(logs, "\n")
 		t.Log("Value of pod name is:", pod.Name)
 		t.Log("Value of logs is:", logs)
 		lib.CreateFile(fmt.Sprintf("/tmp/client-%s.log", c), logs)
-		numberOfLines := strings.Count(logs, "\n") + 1
-		require.Equal(t, numberOfLines, cluster_number)
 		for _, c := range contexts {
-			require.Contains(t, logs, c)
+			require.Contains(t, logsList, c)
 		}
 	}
 }
