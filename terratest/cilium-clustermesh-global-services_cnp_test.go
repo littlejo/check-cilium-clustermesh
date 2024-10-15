@@ -6,10 +6,10 @@ package test
 
 import (
 	"fmt"
-	//"path/filepath"
+	"path/filepath"
 	"strings"
 	"testing"
-	//"time"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -53,7 +53,7 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 		nextIndex := (i + 1) % len(contexts) // Utilisation du modulo pour revenir au début si c'est le dernier élément
 		nextContext := contexts[nextIndex]
 		cnp := lib.CreateCiliumNetworkPolicyString(contextsCiliumClusterName[c], contextsCiliumClusterName[nextContext])
-		//webResourcePath, err := filepath.Abs("../web-server/k8s/common/web-app.yaml")
+		webResourcePath, err := filepath.Abs("../web-server/k8s/common/web-app.yaml")
 		require.NoError(t, err)
 
 		options := k8s.NewKubectlOptions(c, "", namespaceName)
@@ -64,22 +64,22 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 
 		k8s.KubectlApplyFromString(t, options, cm)
 		k8s.KubectlApplyFromString(t, options, cnp)
-		//k8s.KubectlApply(t, options, webResourcePath)
+		k8s.KubectlApply(t, options, webResourcePath)
 	}
 
-	//options := k8s.NewKubectlOptions(contexts[len(contexts)-1], "", namespaceName)
-	//k8s.WaitUntilDeploymentAvailable(t, options, "web-app", 60, time.Duration(1)*time.Second)
+	options := k8s.NewKubectlOptions(contexts[len(contexts)-1], "", namespaceName)
+	k8s.WaitUntilDeploymentAvailable(t, options, "web-app", 60, time.Duration(1)*time.Second)
 
-	//for _, c := range contexts {
-	//	clientResourcePath, err := filepath.Abs("../web-server/k8s/common/client.yaml")
-	//	require.NoError(t, err)
+	for _, c := range contexts {
+		clientResourcePath, err := filepath.Abs("../web-server/k8s/common/client.yaml")
+		require.NoError(t, err)
 
-	//	options := k8s.NewKubectlOptions(c, "", namespaceName)
+		options := k8s.NewKubectlOptions(c, "", namespaceName)
 
-	//	defer k8s.KubectlDelete(t, options, clientResourcePath)
+		//defer k8s.KubectlDelete(t, options, clientResourcePath)
 
-	//	k8s.KubectlApply(t, options, clientResourcePath)
-	//}
+		k8s.KubectlApply(t, options, clientResourcePath)
+	}
 
 	//for _, c := range contexts {
 	//	options := k8s.NewKubectlOptions(c, "", namespaceName)
