@@ -12,6 +12,7 @@ import (
 	//"time"
 
 	//"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 	//metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gruntwork-io/terratest/modules/k8s"
@@ -31,15 +32,20 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 	//clusterNumber := len(contexts)
 	//deploymentName := "client"
 	//containerName := "client"
+	ciliumNamespace := "kube-system"
 
 	//namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
+	contextsCiliumClusterName := make(map[string]string)
 
 	for _, c := range contexts {
-		options := k8s.NewKubectlOptions(c, "", "kube-system")
+		options := k8s.NewKubectlOptions(c, "", ciliumNamespace)
 		ciliumConfigMap := k8s.GetConfigMap(t, options, "cilium-config")
 		t.Log("Value of cm is:", ciliumConfigMap.Data)
-		
+		clusterName, exists := ciliumConfigMap.Data["cluster-name"]
+		assert.True(t, exists, "Key 'cluster-name' should exist in the ConfigMap")
+		contextsCiliumClusterName[c] = clusterName
 	}
+	t.Logf("Contexts to Cluster Names map: %v", contextsCiliumClusterName)
 
 	//for _, c := range contexts {
 	//	cm := lib.CreateConfigMapString(clusterNumber, c)
