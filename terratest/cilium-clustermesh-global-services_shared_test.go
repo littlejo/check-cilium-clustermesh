@@ -28,6 +28,8 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		fmt.Println(err)
 		return
 	}
+	blue := contexts[0]
+	green := contexts[len(contexts)-1]
 	clusterNumber := len(contexts)
 	deploymentName := "client"
 	containerName := "client"
@@ -79,6 +81,14 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		lib.WaitForPodLogs(t, options, pod.Name, containerName, clusterNumber, time.Duration(10)*time.Second)
 		logs := k8s.GetPodLogs(t, options, &pod, containerName)
 		t.Log("Value of logs is:", logs)
+		logsList := strings.Split(logs, "\n")
+		contextsAnalyze := []string{blue}
+		if c == green {
+			contextsAnalyze = []string{blue, green}
+		}
+		for _, c := range contextsAnalyze {
+			require.Contains(t, logsList, c)
+		}
 	}
 
 	options = k8s.NewKubectlOptions(contexts[0], "", namespaceName)
