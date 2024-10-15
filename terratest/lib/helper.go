@@ -44,9 +44,9 @@ func CreateCiliumNetworkPolicyString(endpointClusterName string, ingressClusterN
 	tmpl := `apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy
 metadata:
-  name: "allow-green-access-blue"
+  name: "allow-client-access-to-web-app"
 spec:
-  description: "Allow client in cmesh2 to contact web-app in cmesh0"
+  description: "Allow traffic from clients in {{.IngressClusterName}} to access the web application in {{.EndpointClusterName}}"
   endpointSelector:
     matchLabels:
       app: web-app
