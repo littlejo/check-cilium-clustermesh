@@ -107,10 +107,10 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		pod := k8s.ListPods(t, options, filters)[0]
 		logs := k8s.GetPodLogs(t, options, &pod, containerName)
 		logsList := strings.Split(logs, "\n")
-		contextsAnalyze := contexts
+		contextsAnalyze := []string{c}
 		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-%s.log", c), logs)
-		if i != 0 {
-			contextsAnalyze = []string{c}
+		if i == 0 || i == len(contexts)-1{
+			contextsAnalyze = []string{contexts[0], contexts[len(contexts)-1]}
 		}
 		for _, c := range contextsAnalyze {
 			require.Contains(t, logsList, c)
