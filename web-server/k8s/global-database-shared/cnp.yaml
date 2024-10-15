@@ -1,0 +1,15 @@
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "allow-green-access-blue"
+spec:
+  description: "Allow client in cmesh2 to contact web-app in cmesh0"
+  endpointSelector:
+    matchLabels:
+      app: client
+      io.cilium.k8s.policy.cluster: cmesh2
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: web-app
+        io.cilium.k8s.policy.cluster: cmesh0

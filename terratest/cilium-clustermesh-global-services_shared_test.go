@@ -44,6 +44,7 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		} else if i == len(contexts)-1 {
 			webPath = "../web-server/k8s/global-database-shared/web-app-shared-false.yaml"
 		}
+
 		webResourcePath, err := filepath.Abs(webPath)
 		require.NoError(t, err)
 
@@ -55,6 +56,10 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 
 		k8s.KubectlApplyFromString(t, options, cm)
 		k8s.KubectlApply(t, options, webResourcePath)
+		if i == len(contexts)-1 {
+			cnpResourcePath, _ := filepath.Abs("../web-server/k8s/global-database-shared/cnp.yaml")
+			k8s.KubectlApply(t, options, cnpResourcePath)
+		}
 	}
 
 	options := k8s.NewKubectlOptions(green, "", namespaceName)
