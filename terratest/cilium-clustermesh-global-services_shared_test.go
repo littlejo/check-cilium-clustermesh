@@ -97,13 +97,11 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		LabelSelector: "app=client",
 	}
 
-	pod := k8s.ListPods(t, options, filters)[0]
-
-	lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, waitContexts, clusterNumber, time.Duration(10)*time.Second)
-
-	options = k8s.NewKubectlOptions(contexts[0], "", namespaceName)
-	pod = k8s.ListPods(t, options, filters)[0]
-	lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, waitContexts, clusterNumber, time.Duration(10)*time.Second)
+	for _, c := range contexts {
+		options = k8s.NewKubectlOptions(c, "", namespaceName)
+		pod := k8s.ListPods(t, options, filters)[0]
+		lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, waitContexts, clusterNumber, time.Duration(10)*time.Second)
+	}
 
 	for _, c := range contexts {
 		options := k8s.NewKubectlOptions(c, "", namespaceName)
