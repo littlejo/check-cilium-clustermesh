@@ -7,16 +7,16 @@ package test
 import (
 	"fmt"
 	//"path/filepath"
-	//"strings"
+	"strings"
 	"testing"
 	//"time"
 
-	//"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	//metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gruntwork-io/terratest/modules/k8s"
-	//"github.com/gruntwork-io/terratest/modules/random"
+	"github.com/gruntwork-io/terratest/modules/random"
 
 	"scripts/lib"
 )
@@ -29,12 +29,12 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 		fmt.Println(err)
 		return
 	}
-	//clusterNumber := len(contexts)
+	clusterNumber := len(contexts)
 	//deploymentName := "client"
 	//containerName := "client"
 	ciliumNamespace := "kube-system"
 
-	//namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
+	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 	contextsCiliumClusterName := make(map[string]string)
 
 	for _, c := range contexts {
@@ -47,20 +47,22 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 	}
 	t.Logf("Contexts to Cluster Names map: %v", contextsCiliumClusterName)
 
-	//for _, c := range contexts {
-	//	cm := lib.CreateConfigMapString(clusterNumber, c)
-	//	webResourcePath, err := filepath.Abs("../web-server/k8s/common/web-app.yaml")
-	//	require.NoError(t, err)
+	for _, c := range contexts {
+		cm := lib.CreateConfigMapString(clusterNumber, c)
+		cnp := lib.CreateCiliumNetworkPolicyString(contextsCiliumClusterName[c], contextsCiliumClusterName[c])
+		//webResourcePath, err := filepath.Abs("../web-server/k8s/common/web-app.yaml")
+		require.NoError(t, err)
 
-	//	options := k8s.NewKubectlOptions(c, "", namespaceName)
+		options := k8s.NewKubectlOptions(c, "", namespaceName)
 
-	//	k8s.CreateNamespace(t, options, namespaceName)
-	//	defer k8s.DeleteNamespace(t, options, namespaceName)
-	//	defer k8s.KubectlDelete(t, options, webResourcePath)
+		k8s.CreateNamespace(t, options, namespaceName)
+		//defer k8s.DeleteNamespace(t, options, namespaceName)
+		//defer k8s.KubectlDelete(t, options, webResourcePath)
 
-	//	k8s.KubectlApplyFromString(t, options, cm)
-	//	k8s.KubectlApply(t, options, webResourcePath)
-	//}
+		k8s.KubectlApplyFromString(t, options, cm)
+		k8s.KubectlApplyFromString(t, options, cnp)
+		//k8s.KubectlApply(t, options, webResourcePath)
+	}
 
 	//options := k8s.NewKubectlOptions(contexts[len(contexts)-1], "", namespaceName)
 	//k8s.WaitUntilDeploymentAvailable(t, options, "web-app", 60, time.Duration(1)*time.Second)
