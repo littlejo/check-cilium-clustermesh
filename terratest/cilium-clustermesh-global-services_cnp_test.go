@@ -36,7 +36,7 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 
 	for _, c := range contexts {
 		options := k8s.NewKubectlOptions(c, "", "kube-system")
-		ciliumConfigMap := k8s.GetConfigMap(t, options, "cilium")
+		ciliumConfigMap := k8s.GetConfigMap(t, options, "cilium-config")
 		t.Log("Value of cm is:", ciliumConfigMap.Data)
 		
 	}
