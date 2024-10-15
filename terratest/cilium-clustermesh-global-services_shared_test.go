@@ -99,6 +99,7 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	waitContexts := []string{contexts[0], contexts[len(contexts)-1]}
 
 	lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, waitContexts, clusterNumber, time.Duration(10)*time.Second)
+	lib.WaitForPodAllClustersLogs(t, k8s.NewKubectlOptions(contexts[0], "", namespaceName), pod.Name, containerName, waitContexts, clusterNumber, time.Duration(10)*time.Second)
 
 	for _, c := range contexts {
 		options := k8s.NewKubectlOptions(c, "", namespaceName)
