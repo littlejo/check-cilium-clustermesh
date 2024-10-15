@@ -28,18 +28,18 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		fmt.Println(err)
 		return
 	}
-	cluster_number := len(contexts)
+	clusterNumber := len(contexts)
 	deploymentName := "client"
 	containerName := "client"
 
 	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 
 	for i, c := range contexts {
-		cm := lib.CreateConfigMapString(cluster_number, c)
+		cm := lib.CreateConfigMapString(clusterNumber, c)
 		webPath := "../web-server/k8s/global-database-shared/web-app.yaml"
 		if i == 0 {
 			webPath = "../web-server/k8s/global-database-shared/web-app-shared.yaml"
-		} else if i == len(contexts) - 1 {
+		} else if i == len(contexts)-1 {
 			webPath = "../web-server/k8s/global-database-shared/web-app-shared-false.yaml"
 		}
 		webResourcePath, err := filepath.Abs(webPath)
@@ -76,7 +76,7 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		}
 		k8s.WaitUntilDeploymentAvailable(t, options, deploymentName, 60, time.Duration(1)*time.Second)
 		pod := k8s.ListPods(t, options, filters)[0]
-		lib.WaitForPodLogs(t, options, pod.Name, containerName, cluster_number, time.Duration(10)*time.Second)
+		lib.WaitForPodLogs(t, options, pod.Name, containerName, clusterNumber, time.Duration(10)*time.Second)
 		logs := k8s.GetPodLogs(t, options, &pod, containerName)
 		t.Log("Value of logs is:", logs)
 	}
@@ -91,13 +91,14 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	webResourceSwitchPath, err = filepath.Abs(webSwitchPath)
 	k8s.KubectlApply(t, options, webResourceSwitchPath)
 
-	//TOFIX
-	//filters := metav1.ListOptions{
-	//	LabelSelector: "app=client",
-	//}
-	//pod := k8s.ListPods(t, options, filters)[0]
+	filters := metav1.ListOptions{
+		LabelSelector: "app=client",
+	}
+	pod := k8s.ListPods(t, options, filters)[0]
 
-	//lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, contexts, cluster_number, time.Duration(10)*time.Second)
+	waitContexts := []string{contexts[0], contexts[len(contexts)-1]}
+
+	lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, waitContexts, clusterNumber, time.Duration(10)*time.Second)
 
 	for _, c := range contexts {
 		options := k8s.NewKubectlOptions(c, "", namespaceName)
