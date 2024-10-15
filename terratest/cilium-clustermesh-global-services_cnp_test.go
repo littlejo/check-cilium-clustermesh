@@ -47,9 +47,12 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 	}
 	t.Logf("Contexts to Cluster Names map: %v", contextsCiliumClusterName)
 
-	for _, c := range contexts {
+	for i, c := range contexts {
 		cm := lib.CreateConfigMapString(clusterNumber, c)
-		cnp := lib.CreateCiliumNetworkPolicyString(contextsCiliumClusterName[c], contextsCiliumClusterName[c])
+
+		nextIndex := (i + 1) % len(contexts) // Utilisation du modulo pour revenir au début si c'est le dernier élément
+		nextContext := contexts[nextIndex]
+		cnp := lib.CreateCiliumNetworkPolicyString(contextsCiliumClusterName[c], contextsCiliumClusterName[nextContext])
 		//webResourcePath, err := filepath.Abs("../web-server/k8s/common/web-app.yaml")
 		require.NoError(t, err)
 
