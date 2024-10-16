@@ -82,7 +82,7 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 	}
 
 	for i, c := range contexts {
-		previousContext := contexts[(i-1+len(contexts)) % len(contexts)]
+		previousContext := contexts[(i-1+len(contexts))%len(contexts)]
 		options := k8s.NewKubectlOptions(c, "", namespaceName)
 		filters := metav1.ListOptions{
 			LabelSelector: "app=client",
@@ -92,9 +92,11 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 		lib.WaitForPodLogs(t, options, pod.Name, containerName, clusterNumber, time.Duration(10)*time.Second)
 		logs := k8s.GetPodLogs(t, options, &pod, containerName)
 		logsList := strings.Split(logs, "\n")
+		LogsMap := lib.Uniq(logsList)
 		t.Log("Value of pod name is:", pod.Name)
 		t.Log("Value of logs is:", logs)
-		lib.CreateFile(fmt.Sprintf("/tmp/client-cnp-%s.log", c), logs)
+		lib.CreateFile(fmt.Sprintf("/tmp/client-cnp-%s.log", c), lib.MapToString(LogsMap))
 		require.Contains(t, logsList, previousContext)
+		require.Equal(t, len(LogsMap), 1)
 	}
 }
