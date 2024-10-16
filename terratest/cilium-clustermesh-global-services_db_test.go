@@ -23,6 +23,8 @@ import (
 func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 	t.Parallel()
 
+	db_index := 0
+
 	contexts, err := lib.GetKubeContexts(t)
 	if err != nil {
 		fmt.Println(err)
@@ -37,7 +39,7 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 	for i, c := range contexts {
 		cm := lib.CreateConfigMapString(cluster_number, c)
 		file_web := "../web-server/k8s/global-database/global-svc.yaml"
-		if i == 0 {
+		if i == db_index {
 			file_web = "../web-server/k8s/common/web-app.yaml"
 		}
 		webResourcePath, err := filepath.Abs(file_web)
@@ -74,8 +76,10 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 		lib.WaitForPodLogs(t, options, pod.Name, containerName, cluster_number, time.Duration(10)*time.Second)
 		logs := k8s.GetPodLogs(t, options, &pod, containerName)
 		logsList := strings.Split(logs, "\n")
-		t.Log("Value of logs is:", logs)
-		lib.CreateFile(fmt.Sprintf("/tmp/client-db-%s.log", c), logs)
-		require.Contains(t, logsList, contexts[0])
+		LogsMap := lib.Uniq(logsList)
+		t.Log("Value of logs is:", lib.MapToString(logsMap))
+		lib.CreateFile(fmt.Sprintf("/tmp/client-db-%s.log", c), lib.MapToString(logsMap))
+		require.Contains(t, logsList, contexts[db_index])
+		require.Equal(t, len(LogsMap), 1)
 	}
 }
