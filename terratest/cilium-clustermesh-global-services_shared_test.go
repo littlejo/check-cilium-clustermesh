@@ -83,9 +83,14 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		logs := k8s.GetPodLogs(t, options, &pod, containerName)
 		t.Log("Value of logs is:", logs)
 		logsList := strings.Split(logs, "\n")
+		LogsMap := lib.Uniq(logsList)
+		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-blue-%s.log", c), lib.MapToString(LogsMap))
 		contextsAnalyze := []string{blue}
 		if c == green {
 			contextsAnalyze = []string{blue, green}
+			require.Equal(t, len(LogsMap), 2)
+		} else {
+			require.Equal(t, len(LogsMap), 1)
 		}
 		for _, c := range contextsAnalyze {
 			require.Contains(t, logsList, c)
@@ -122,12 +127,12 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		pod := k8s.ListPods(t, options, filters)[0]
 		logs := k8s.GetPodLogs(t, options, &pod, containerName)
 		logsList := strings.Split(logs, "\n")
+		LogsMap := lib.Uniq(logsList)
 		contextsAnalyze := []string{blue, green}
-		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-%s.log", c), logs)
+		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-green-%s.log", c), lib.MapToString(LogsMap))
 		for _, c := range contextsAnalyze {
 			require.Contains(t, logsList, c)
 		}
-		t.Log("Value of pod name is:", pod.Name)
-		t.Log("Value of logs is:", logs)
+		require.Equal(t, len(LogsMap), 2)
 	}
 }
