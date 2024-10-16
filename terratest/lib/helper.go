@@ -2,6 +2,7 @@ package lib
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -166,18 +167,6 @@ func Uniq(list []string) map[string]int {
 }
 
 func MapToString(m map[string]int) string {
-	var sb strings.Builder
-	sb.WriteString("{") // Commence avec une accolade ouvrante
-
-	first := true
-	for key, value := range m {
-		if !first {
-			sb.WriteString(", ") // Ajoute une virgule entre les paires clé-valeur
-		}
-		first = false
-		sb.WriteString(fmt.Sprintf("%s: %d", key, value)) // Ajoute "clé: valeur" au builder
-	}
-
-	sb.WriteString("}") // Termine avec une accolade fermante
-	return sb.String()
+	jsonData, _ := json.Marshal(m)
+	return string(jsonData)
 }
