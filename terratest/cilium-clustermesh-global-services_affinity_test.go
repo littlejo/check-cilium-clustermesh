@@ -63,31 +63,21 @@ func TestCiliumClusterMeshGlobalServiceAffinity(t *testing.T) {
 		k8s.KubectlApply(t, options, clientResourcePath)
 	}
 
-	for i, c := range contexts {
+	for _, c := range contexts {
 		options := k8s.NewKubectlOptions(c, "", namespaceName)
 		filters := metav1.ListOptions{
 			LabelSelector: "app=client",
 		}
 		k8s.WaitUntilDeploymentAvailable(t, options, deploymentName, 60, time.Duration(1)*time.Second)
 		pod := k8s.ListPods(t, options, filters)[0]
-		if i == 0 {
-			lib.WaitForPodLogs(t, options, pod.Name, containerName, clusterNumber, time.Duration(10)*time.Second)
-		} else {
-			lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, contexts, clusterNumber, time.Duration(10)*time.Second)
-		}
+		lib.WaitForPodLogs(t, options, pod.Name, containerName, clusterNumber, time.Duration(10)*time.Second)
 		logs := k8s.GetPodLogs(t, options, &pod, containerName)
 		logsList := strings.Split(logs, "\n")
 		LogsMap := lib.Uniq(logsList)
+		t.Log("context:", c)
 		t.Log("Value of logs is:", lib.MapToString(LogsMap))
-		if i == 0 {
-			require.Equal(t, len(LogsMap), 1)
-			require.Contains(t, logsList, c)
-		} else {
-			require.Equal(t, len(LogsMap), clusterNumber)
-			for _, c := range contexts {
-				require.Contains(t, logsList, c)
-			}
-		}
+		require.Equal(t, len(LogsMap), 1)
+		require.Contains(t, logsList, c)
 	}
 
 	options = k8s.NewKubectlOptions(contexts[0], "", namespaceName)
