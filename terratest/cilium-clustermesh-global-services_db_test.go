@@ -30,14 +30,14 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 		fmt.Println(err)
 		return
 	}
-	cluster_number := len(contexts)
+	clusterNumber := len(contexts)
 	deploymentName := "client"
 	containerName := "client"
 
 	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 
 	for i, c := range contexts {
-		cm := lib.CreateConfigMapString(cluster_number, c)
+		cm := lib.CreateConfigMapString(clusterNumber, c)
 		file_web := "../web-server/k8s/global-database/global-svc.yaml"
 		if i == db_index {
 			file_web = "../web-server/k8s/common/web-app.yaml"
@@ -73,13 +73,13 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 		}
 		k8s.WaitUntilDeploymentAvailable(t, options, deploymentName, 60, time.Duration(1)*time.Second)
 		pod := k8s.ListPods(t, options, filters)[0]
-		lib.WaitForPodLogs(t, options, pod.Name, containerName, cluster_number, time.Duration(10)*time.Second)
+		lib.WaitForPodLogs(t, options, pod.Name, containerName, clusterNumber, time.Duration(10)*time.Second)
 		logs := k8s.GetPodLogs(t, options, &pod, containerName)
 		logsList := strings.Split(logs, "\n")
-		LogsMap := lib.Uniq(logsList)
+		logsMap := lib.Uniq(logsList)
 		t.Log("Value of logs is:", lib.MapToString(logsMap))
 		lib.CreateFile(fmt.Sprintf("/tmp/client-db-%s.log", c), lib.MapToString(logsMap))
 		require.Contains(t, logsList, contexts[db_index])
-		require.Equal(t, len(LogsMap), 1)
+		require.Equal(t, len(logsMap), 1)
 	}
 }
