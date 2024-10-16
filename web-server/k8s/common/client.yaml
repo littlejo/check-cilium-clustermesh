@@ -9,7 +9,7 @@ data:
 
     while true
     do
-      curl --connect-timeout 1 http://$svc_name:8080 2> /dev/null
+      curl --connect-timeout 0.5 http://$svc_name:8080 2> /dev/null
       sleep $interval
     done
 
