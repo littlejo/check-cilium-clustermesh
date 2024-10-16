@@ -28,14 +28,14 @@ func TestCiliumClusterMeshGlobalServiceAffinity(t *testing.T) {
 		fmt.Println(err)
 		return
 	}
-	cluster_number := len(contexts)
+	clusterNumber := len(contexts)
 	deploymentName := "client"
 	containerName := "client"
 
 	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 
 	for _, c := range contexts {
-		cm := lib.CreateConfigMapString(cluster_number, c)
+		cm := lib.CreateConfigMapString(clusterNumber, c)
 		webResourcePath, err := filepath.Abs("../web-server/k8s/global-load-balancing-affinity/web-app.yaml")
 		require.NoError(t, err)
 
@@ -63,16 +63,31 @@ func TestCiliumClusterMeshGlobalServiceAffinity(t *testing.T) {
 		k8s.KubectlApply(t, options, clientResourcePath)
 	}
 
-	for _, c := range contexts {
+	for i, c := range contexts {
 		options := k8s.NewKubectlOptions(c, "", namespaceName)
 		filters := metav1.ListOptions{
 			LabelSelector: "app=client",
 		}
 		k8s.WaitUntilDeploymentAvailable(t, options, deploymentName, 60, time.Duration(1)*time.Second)
 		pod := k8s.ListPods(t, options, filters)[0]
-		lib.WaitForPodLogs(t, options, pod.Name, containerName, cluster_number, time.Duration(10)*time.Second)
+		if i == 0 {
+			lib.WaitForPodLogs(t, options, pod.Name, containerName, clusterNumber, time.Duration(10)*time.Second)
+		} else {
+			lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, contexts, clusterNumber, time.Duration(10)*time.Second)
+		}
 		logs := k8s.GetPodLogs(t, options, &pod, containerName)
-		t.Log("Value of logs is:", logs)
+		logsList := strings.Split(logs, "\n")
+		LogsMap := lib.Uniq(logsList)
+		t.Log("Value of logs is:", lib.MapToString(LogsMap))
+		if i == 0 {
+			require.Equal(t, len(LogsMap), 1)
+			require.Contains(t, logsList, c)
+		} else {
+			require.Equal(t, len(LogsMap), clusterNumber)
+			for _, c := range contexts {
+				require.Contains(t, logsList, c)
+			}
+		}
 	}
 
 	options = k8s.NewKubectlOptions(contexts[0], "", namespaceName)
@@ -83,7 +98,7 @@ func TestCiliumClusterMeshGlobalServiceAffinity(t *testing.T) {
 	}
 	pod := k8s.ListPods(t, options, filters)[0]
 
-	lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, contexts, cluster_number, time.Duration(10)*time.Second)
+	lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, contexts, clusterNumber, time.Duration(10)*time.Second)
 
 	for i, c := range contexts {
 		options := k8s.NewKubectlOptions(c, "", namespaceName)
@@ -93,8 +108,9 @@ func TestCiliumClusterMeshGlobalServiceAffinity(t *testing.T) {
 		pod := k8s.ListPods(t, options, filters)[0]
 		logs := k8s.GetPodLogs(t, options, &pod, containerName)
 		logsList := strings.Split(logs, "\n")
+		LogsMap := lib.Uniq(logsList)
 		contextsAnalyze := contexts
-		lib.CreateFile(fmt.Sprintf("/tmp/client-affinity-%s.log", c), logs)
+		lib.CreateFile(fmt.Sprintf("/tmp/client-affinity-%s.log", c), lib.MapToString(LogsMap))
 		if i != 0 {
 			contextsAnalyze = []string{c}
 		}
