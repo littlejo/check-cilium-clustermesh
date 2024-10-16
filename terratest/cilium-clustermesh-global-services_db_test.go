@@ -7,7 +7,6 @@ package test
 import (
 	"fmt"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -22,8 +21,6 @@ import (
 )
 
 func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
-	t.Parallel()
-
 	contexts, err := lib.GetKubeContexts(t)
 	if err != nil {
 		fmt.Println(err)
@@ -34,7 +31,8 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 	containerName := "client"
 
 	for db_index, _ := range contexts {
-		t.Run("TestCiliumClusterMeshGlobalServiceDB_"+strconv.Itoa(db_index), func(t *testing.T) {
+		t.Run("TestCiliumClusterMeshGlobalServiceDB_"+contexts[db_index], func(t *testing.T) {
+			t.Parallel()
 			namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 
 			for i, c := range contexts {
