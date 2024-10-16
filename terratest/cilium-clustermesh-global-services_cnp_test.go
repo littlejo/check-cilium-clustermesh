@@ -94,7 +94,7 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 		logsList := strings.Split(logs, "\n")
 		LogsMap := lib.Uniq(logsList)
 		t.Log("Value of pod name is:", pod.Name)
-		t.Log("Value of logs is:", logs)
+		t.Log("Value of logs is:", lib.MapToString(LogsMap))
 		lib.CreateFile(fmt.Sprintf("/tmp/client-cnp-%s.log", c), lib.MapToString(LogsMap))
 		require.Contains(t, logsList, previousContext)
 		require.Equal(t, len(LogsMap), 1)
