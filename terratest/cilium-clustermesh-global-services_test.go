@@ -7,7 +7,6 @@ package test
 import (
 	"fmt"
 	"path/filepath"
-	"sort"
 	"strings"
 	"testing"
 	"time"
