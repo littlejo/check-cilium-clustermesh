@@ -108,6 +108,6 @@ func TestCiliumClusterMeshGlobalServiceAffinity(t *testing.T) {
 			require.Contains(t, logsList, c)
 		}
 		t.Log("Value of pod name is:", pod.Name)
-		t.Log("Value of logs is:", logs)
+		t.Log("Value of logs is:", lib.MapToString(LogsMap))
 	}
 }

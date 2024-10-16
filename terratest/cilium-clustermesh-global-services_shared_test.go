@@ -81,9 +81,9 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		pod := k8s.ListPods(t, options, filters)[0]
 		lib.WaitForPodLogs(t, options, pod.Name, containerName, clusterNumber, time.Duration(10)*time.Second)
 		logs := k8s.GetPodLogs(t, options, &pod, containerName)
-		t.Log("Value of logs is:", logs)
 		logsList := strings.Split(logs, "\n")
 		LogsMap := lib.Uniq(logsList)
+		t.Log("Value of logs is:", lib.MapToString(LogsMap))
 		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-blue-%s.log", c), lib.MapToString(LogsMap))
 		contextsAnalyze := []string{blue}
 		if c == green {
