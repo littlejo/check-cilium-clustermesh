@@ -79,7 +79,7 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 				logsList := strings.Split(logs, "\n")
 				logsMap := lib.Uniq(logsList)
 				t.Log("Value of logs is:", lib.MapToString(logsMap))
-				lib.CreateFile(fmt.Sprintf("/tmp/client-db-%s.log", c), lib.MapToString(logsMap))
+				lib.CreateFile(fmt.Sprintf("/tmp/client-db-%s-%s.log", contexts[db_index], c), lib.MapToString(logsMap))
 				require.Contains(t, logsList, contexts[db_index])
 				require.Equal(t, len(logsMap), 1)
 			}
