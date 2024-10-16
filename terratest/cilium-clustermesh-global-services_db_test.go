@@ -7,6 +7,7 @@ package test
 import (
 	"fmt"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -23,8 +24,6 @@ import (
 func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 	t.Parallel()
 
-	db_index := 0
-
 	contexts, err := lib.GetKubeContexts(t)
 	if err != nil {
 		fmt.Println(err)
@@ -34,52 +33,56 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 	deploymentName := "client"
 	containerName := "client"
 
-	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
+	for db_index, _ := range contexts {
+		t.Run("TestCiliumClusterMeshGlobalServiceDB_"+strconv.Itoa(db_index), func(t *testing.T) {
+			namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 
-	for i, c := range contexts {
-		cm := lib.CreateConfigMapString(clusterNumber, c)
-		file_web := "../web-server/k8s/global-database/global-svc.yaml"
-		if i == db_index {
-			file_web = "../web-server/k8s/common/web-app.yaml"
-		}
-		webResourcePath, err := filepath.Abs(file_web)
-		require.NoError(t, err)
+			for i, c := range contexts {
+				cm := lib.CreateConfigMapString(clusterNumber, c)
+				file_web := "../web-server/k8s/global-database/global-svc.yaml"
+				if i == db_index {
+					file_web = "../web-server/k8s/common/web-app.yaml"
+				}
+				webResourcePath, err := filepath.Abs(file_web)
+				require.NoError(t, err)
 
-		options := k8s.NewKubectlOptions(c, "", namespaceName)
+				options := k8s.NewKubectlOptions(c, "", namespaceName)
 
-		k8s.CreateNamespace(t, options, namespaceName)
-		defer k8s.DeleteNamespace(t, options, namespaceName)
-		defer k8s.KubectlDelete(t, options, webResourcePath)
+				k8s.CreateNamespace(t, options, namespaceName)
+				defer k8s.DeleteNamespace(t, options, namespaceName)
+				defer k8s.KubectlDelete(t, options, webResourcePath)
 
-		k8s.KubectlApplyFromString(t, options, cm)
-		k8s.KubectlApply(t, options, webResourcePath)
-	}
+				k8s.KubectlApplyFromString(t, options, cm)
+				k8s.KubectlApply(t, options, webResourcePath)
+			}
 
-	for _, c := range contexts {
-		clientResourcePath, err := filepath.Abs("../web-server/k8s/common/client.yaml")
-		require.NoError(t, err)
+			for _, c := range contexts {
+				clientResourcePath, err := filepath.Abs("../web-server/k8s/common/client.yaml")
+				require.NoError(t, err)
 
-		options := k8s.NewKubectlOptions(c, "", namespaceName)
+				options := k8s.NewKubectlOptions(c, "", namespaceName)
 
-		defer k8s.KubectlDelete(t, options, clientResourcePath)
+				defer k8s.KubectlDelete(t, options, clientResourcePath)
 
-		k8s.KubectlApply(t, options, clientResourcePath)
-	}
+				k8s.KubectlApply(t, options, clientResourcePath)
+			}
 
-	for _, c := range contexts {
-		options := k8s.NewKubectlOptions(c, "", namespaceName)
-		filters := metav1.ListOptions{
-			LabelSelector: "app=client",
-		}
-		k8s.WaitUntilDeploymentAvailable(t, options, deploymentName, 60, time.Duration(1)*time.Second)
-		pod := k8s.ListPods(t, options, filters)[0]
-		lib.WaitForPodLogs(t, options, pod.Name, containerName, clusterNumber, time.Duration(10)*time.Second)
-		logs := k8s.GetPodLogs(t, options, &pod, containerName)
-		logsList := strings.Split(logs, "\n")
-		logsMap := lib.Uniq(logsList)
-		t.Log("Value of logs is:", lib.MapToString(logsMap))
-		lib.CreateFile(fmt.Sprintf("/tmp/client-db-%s.log", c), lib.MapToString(logsMap))
-		require.Contains(t, logsList, contexts[db_index])
-		require.Equal(t, len(logsMap), 1)
+			for _, c := range contexts {
+				options := k8s.NewKubectlOptions(c, "", namespaceName)
+				filters := metav1.ListOptions{
+					LabelSelector: "app=client",
+				}
+				k8s.WaitUntilDeploymentAvailable(t, options, deploymentName, 60, time.Duration(1)*time.Second)
+				pod := k8s.ListPods(t, options, filters)[0]
+				lib.WaitForPodLogs(t, options, pod.Name, containerName, clusterNumber, time.Duration(10)*time.Second)
+				logs := k8s.GetPodLogs(t, options, &pod, containerName)
+				logsList := strings.Split(logs, "\n")
+				logsMap := lib.Uniq(logsList)
+				t.Log("Value of logs is:", lib.MapToString(logsMap))
+				lib.CreateFile(fmt.Sprintf("/tmp/client-db-%s.log", c), lib.MapToString(logsMap))
+				require.Contains(t, logsList, contexts[db_index])
+				require.Equal(t, len(logsMap), 1)
+			}
+		})
 	}
 }
