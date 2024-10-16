@@ -13,7 +13,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	//metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/random"
@@ -30,8 +30,8 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 		return
 	}
 	clusterNumber := len(contexts)
-	//deploymentName := "client"
-	//containerName := "client"
+	deploymentName := "client"
+	containerName := "client"
 	ciliumNamespace := "kube-system"
 
 	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
@@ -50,7 +50,7 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 	for i, c := range contexts {
 		cm := lib.CreateConfigMapString(clusterNumber, c)
 
-		nextIndex := (i + 1) % len(contexts) // Utilisation du modulo pour revenir au début si c'est le dernier élément
+		nextIndex := (i + 1) % len(contexts)
 		nextContext := contexts[nextIndex]
 		cnp := lib.CreateCiliumNetworkPolicyString(contextsCiliumClusterName[c], contextsCiliumClusterName[nextContext])
 		webResourcePath, err := filepath.Abs("../web-server/k8s/common/web-app.yaml")
@@ -59,8 +59,8 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 		options := k8s.NewKubectlOptions(c, "", namespaceName)
 
 		k8s.CreateNamespace(t, options, namespaceName)
-		//defer k8s.DeleteNamespace(t, options, namespaceName)
-		//defer k8s.KubectlDelete(t, options, webResourcePath)
+		defer k8s.DeleteNamespace(t, options, namespaceName)
+		defer k8s.KubectlDelete(t, options, webResourcePath)
 
 		k8s.KubectlApplyFromString(t, options, cm)
 		k8s.KubectlApplyFromString(t, options, cnp)
@@ -76,26 +76,26 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 
 		options := k8s.NewKubectlOptions(c, "", namespaceName)
 
-		//defer k8s.KubectlDelete(t, options, clientResourcePath)
+		defer k8s.KubectlDelete(t, options, clientResourcePath)
 
 		k8s.KubectlApply(t, options, clientResourcePath)
 	}
 
-	//for _, c := range contexts {
-	//	options := k8s.NewKubectlOptions(c, "", namespaceName)
-	//	filters := metav1.ListOptions{
-	//		LabelSelector: "app=client",
-	//	}
-	//	k8s.WaitUntilDeploymentAvailable(t, options, deploymentName, 60, time.Duration(1)*time.Second)
-	//	pod := k8s.ListPods(t, options, filters)[0]
-	//	lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, contexts, clusterNumber, time.Duration(10)*time.Second)
-	//	logs := k8s.GetPodLogs(t, options, &pod, containerName)
-	//	logsList := strings.Split(logs, "\n")
-	//	t.Log("Value of pod name is:", pod.Name)
-	//	t.Log("Value of logs is:", logs)
-	//	lib.CreateFile(fmt.Sprintf("/tmp/client-cnp-%s.log", c), logs)
-	//	for _, c := range contexts {
-	//		require.Contains(t, logsList, c)
-	//	}
-	//}
+	for i, c := range contexts {
+		nextIndex := (i + 1) % len(contexts)
+		nextContext := contexts[nextIndex]
+		options := k8s.NewKubectlOptions(c, "", namespaceName)
+		filters := metav1.ListOptions{
+			LabelSelector: "app=client",
+		}
+		k8s.WaitUntilDeploymentAvailable(t, options, deploymentName, 60, time.Duration(1)*time.Second)
+		pod := k8s.ListPods(t, options, filters)[0]
+		lib.WaitForPodLogs(t, options, pod.Name, containerName, clusterNumber, time.Duration(10)*time.Second)
+		logs := k8s.GetPodLogs(t, options, &pod, containerName)
+		logsList := strings.Split(logs, "\n")
+		t.Log("Value of pod name is:", pod.Name)
+		t.Log("Value of logs is:", logs)
+		lib.CreateFile(fmt.Sprintf("/tmp/client-cnp-%s.log", c), logs)
+		require.Contains(t, logsList, nextContext)
+	}
 }
