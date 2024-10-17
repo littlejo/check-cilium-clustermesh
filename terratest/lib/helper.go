@@ -214,7 +214,7 @@ func WaitForPodLogsNew(t *testing.T, context string, namespaceName string, pod c
 	for i := 0; i < maxRetries; i++ {
 		logsList = GetLogsList(t, context, namespaceName, pod)
 
-		if len(logsList) > 1 {
+		if len(logsList) > 4 {
 			return logsList, nil
 		}
 
