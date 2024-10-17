@@ -35,8 +35,6 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	clusterNumber := len(contexts)
 	blue := contexts[0]
 	green := contexts[clusterNumber-1]
-	deploymentName := "client"
-	containerName := "client"
 
 	webAppImage := "ttl.sh/littlejo-webapp:2h"
 	deploymentWebAppYAML = strings.Replace(deploymentWebAppYAML, "IMAGE", webAppImage, 1)
@@ -73,28 +71,10 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	}
 
 	for _, c := range contexts {
-		options := k8s.NewKubectlOptions(c, "", namespaceName)
-		filters := metav1.ListOptions{
-			LabelSelector: "app=client",
-		}
-		k8s.WaitUntilDeploymentAvailable(t, options, deploymentName, 60, time.Duration(1)*time.Second)
-		pod := k8s.ListPods(t, options, filters)[0]
-		lib.WaitForPodLogs(t, options, pod.Name, containerName, clusterNumber, time.Duration(10)*time.Second)
-		logs := k8s.GetPodLogs(t, options, &pod, containerName)
-		logsList := strings.Split(logs, "\n")
-		LogsMap := lib.Uniq(logsList)
-		t.Log("Value of logs is:", lib.MapToString(LogsMap))
-		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-blue-%s.log", c), lib.MapToString(LogsMap))
-		contextsAnalyze := []string{blue}
-		if c == green {
-			contextsAnalyze = []string{blue, green}
-			require.Equal(t, len(LogsMap), 2)
-		} else {
-			require.Equal(t, len(LogsMap), 1)
-		}
-		for _, c := range contextsAnalyze {
-			require.Contains(t, logsList, c)
-		}
+		pod := lib.RetrieveClient(t, c, namespaceName)
+		logsList, _ := lib.WaitForPodLogsNew(t, c, namespaceName, pod, clusterNumber, time.Duration(10)*time.Second)
+		logsMap := lib.ValidateLogsSharedStep1(t, logsList, c, []string{blue, green})
+		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-blue-%s.log", c), lib.MapToString(logsMap))
 	}
 
 	options = k8s.NewKubectlOptions(blue, "", namespaceName)
@@ -116,7 +96,7 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	for _, c := range contexts {
 		options = k8s.NewKubectlOptions(c, "", namespaceName)
 		pod := k8s.ListPods(t, options, filters)[0]
-		lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, waitContexts, clusterNumber, time.Duration(10)*time.Second)
+		lib.WaitForPodAllClustersLogs(t, options, pod.Name, "", waitContexts, clusterNumber, time.Duration(10)*time.Second)
 	}
 
 	for _, c := range contexts {
@@ -125,7 +105,7 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 			LabelSelector: "app=client",
 		}
 		pod := k8s.ListPods(t, options, filters)[0]
-		logs := k8s.GetPodLogs(t, options, &pod, containerName)
+		logs := k8s.GetPodLogs(t, options, &pod, "")
 		logsList := strings.Split(logs, "\n")
 		LogsMap := lib.Uniq(logsList)
 		contextsAnalyze := []string{blue, green}
