@@ -269,3 +269,14 @@ func ValidateLogsSharedStep1(t *testing.T, logsList []string, context string, ex
 	}
 	return logsMap
 }
+
+func ValidateLogsSharedStep2(t *testing.T, logsList []string, context string, expectedContexts []string) map[string]int {
+	logsMap := Uniq(logsList)
+	t.Log("Value of logs is:", MapToString(logsMap))
+
+	for _, c := range expectedContexts {
+		require.Contains(t, logsList, c)
+	}
+	require.Equal(t, len(logsMap), 2)
+	return logsMap
+}
