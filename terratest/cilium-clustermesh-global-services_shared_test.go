@@ -5,6 +5,7 @@ package test
 //./test-binary -test.v
 
 import (
+	_ "embed"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -20,56 +21,55 @@ import (
 	"scripts/lib"
 )
 
+//go:embed k8s/global-database-shared/svc-shared.yaml
+var svcWebAppYAML string
+
+//go:embed k8s/common/deployment-web-app.yaml
+var deploymentWebAppYAML string
+
 func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	t.Parallel()
 
 	contexts, err := lib.GetKubeContexts(t)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	blue := contexts[0]
-	green := contexts[len(contexts)-1]
+	require.NoError(t, err, "Failed to get Kube contexts")
 	clusterNumber := len(contexts)
+	blue := contexts[0]
+	green := contexts[clusterNumber-1]
 	deploymentName := "client"
 	containerName := "client"
 
+	webAppImage := "ttl.sh/littlejo-webapp:2h"
+	deploymentWebAppYAML = strings.Replace(deploymentWebAppYAML, "IMAGE", webAppImage, 1)
+
+	sharedSvcWebAppYAML := strings.Replace(svcWebAppYAML, "SHARED", "true", 1)
+	unsharedSvcWebAppYAML := strings.Replace(svcWebAppYAML, "SHARED", "false", 1)
+
 	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 
-	for i, c := range contexts {
+	for _, c := range contexts {
 		cm := lib.CreateConfigMapString(clusterNumber, c)
-		webPath := "../web-server/k8s/global-database-shared/web-app.yaml"
-		if i == 0 {
-			webPath = "../web-server/k8s/global-database-shared/web-app-shared.yaml"
-		} else if i == len(contexts)-1 {
-			webPath = "../web-server/k8s/global-database-shared/web-app-shared-false.yaml"
+
+		lib.CreateNamespace(t, c, namespaceName)
+		defer lib.DeleteNamespace(t, c, namespaceName)
+		lib.ApplyResourceToNamespace(t, c, namespaceName, cm)
+
+		webSvcYAML := unsharedSvcWebAppYAML
+		if c == blue {
+			webSvcYAML = sharedSvcWebAppYAML
 		}
-
-		webResourcePath, err := filepath.Abs(webPath)
-		require.NoError(t, err)
-
-		options := k8s.NewKubectlOptions(c, "", namespaceName)
-
-		k8s.CreateNamespace(t, options, namespaceName)
-		defer k8s.DeleteNamespace(t, options, namespaceName)
-		defer k8s.KubectlDelete(t, options, webResourcePath)
-
-		k8s.KubectlApplyFromString(t, options, cm)
-		k8s.KubectlApply(t, options, webResourcePath)
+		lib.ApplyResourceToNamespace(t, c, namespaceName, webSvcYAML)
+		if c == blue || c == green {
+			lib.ApplyResourceToNamespace(t, c, namespaceName, deploymentWebAppYAML)
+			defer lib.DeleteResourceToNamespace(t, c, namespaceName, deploymentWebAppYAML)
+		}
 	}
 
 	options := k8s.NewKubectlOptions(green, "", namespaceName)
 	k8s.WaitUntilDeploymentAvailable(t, options, "web-app", 60, time.Duration(1)*time.Second)
 
 	for _, c := range contexts {
-		clientResourcePath, err := filepath.Abs("../web-server/k8s/common/client.yaml")
-		require.NoError(t, err)
-
-		options := k8s.NewKubectlOptions(c, "", namespaceName)
-
-		defer k8s.KubectlDelete(t, options, clientResourcePath)
-
-		k8s.KubectlApply(t, options, clientResourcePath)
+		defer lib.DeleteResourceToNamespace(t, c, namespaceName, clientYAML)
+		lib.ApplyResourceToNamespace(t, c, namespaceName, clientYAML)
 	}
 
 	for _, c := range contexts {
