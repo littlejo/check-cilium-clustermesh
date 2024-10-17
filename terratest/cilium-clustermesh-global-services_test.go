@@ -27,7 +27,6 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 	contexts, err := lib.GetKubeContexts(t)
 	require.NoError(t, err, "Failed to get Kube contexts")
 	clusterNumber := len(contexts)
-	containerName := "client"
 
 	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 
@@ -51,18 +50,10 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 	}
 
 	for _, c := range contexts {
-		options := k8s.NewKubectlOptions(c, "", namespaceName)
 		pod := lib.RetrieveClient(t, c, namespaceName)
-		lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, contexts, clusterNumber, time.Duration(10)*time.Second)
-		logs := k8s.GetPodLogs(t, options, &pod, containerName)
-		logsList := strings.Split(logs, "\n")
-		LogsMap := lib.Uniq(logsList)
-		t.Log("Value of pod name is:", pod.Name)
-		t.Log("Value of logs is:", lib.MapToString(LogsMap))
+		lib.WaitForPodAllClustersLogsNew(t, c, namespaceName, pod, contexts, clusterNumber, time.Duration(10)*time.Second)
+		logsList := lib.GetLogsList(t, c, namespaceName, pod)
+		LogsMap := lib.ValidateLogsGlobalServices(t, logsList, contexts)
 		lib.CreateFile(fmt.Sprintf("/tmp/client-%s.log", c), lib.MapToString(LogsMap))
-		require.Equal(t, len(LogsMap), clusterNumber)
-		for _, c := range contexts {
-			require.Contains(t, logsList, c)
-		}
 	}
 }
