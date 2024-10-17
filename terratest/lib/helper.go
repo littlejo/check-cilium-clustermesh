@@ -12,8 +12,9 @@ import (
 
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/shell"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func CreateConfigMapString(n int, name string) string {
@@ -200,4 +201,41 @@ func RetrieveClient(t *testing.T, context string, namespaceName string) corev1.P
 	}
 	k8s.WaitUntilDeploymentAvailable(t, options, "client", 60, time.Duration(1)*time.Second)
 	return k8s.ListPods(t, options, filters)[0]
+}
+
+func GetLogsList(t *testing.T, context string, namespaceName string, pod corev1.Pod) []string {
+	options := k8s.NewKubectlOptions(context, "", namespaceName)
+	logs := k8s.GetPodLogs(t, options, &pod, "")
+	return strings.Split(logs, "\n")
+}
+
+func WaitForPodAllClustersLogsNew(t *testing.T, context string, namespaceName string, pod corev1.Pod, contexts []string, maxRetries int, retryInterval time.Duration) ([]string, error) {
+	var logsList []string
+	for i := 0; i < maxRetries; i++ {
+		logsList = GetLogsList(t, context, namespaceName, pod)
+		allPresent := true
+		for _, c := range contexts {
+			if !contains(logsList, c) {
+				allPresent = false
+			}
+		}
+
+		if allPresent {
+			return logsList, nil
+		}
+
+		time.Sleep(retryInterval)
+	}
+
+	return logsList, fmt.Errorf("Impossible to retrieve after %d tries", maxRetries)
+}
+
+func ValidateLogsGlobalServices(t *testing.T, logsList []string, contexts []string) map[string]int {
+	LogsMap := Uniq(logsList)
+	t.Log("Value of logs is:", MapToString(LogsMap))
+	require.Equal(t, len(LogsMap), len(contexts))
+	for _, c := range contexts {
+		require.Contains(t, logsList, c)
+	}
+	return LogsMap
 }
