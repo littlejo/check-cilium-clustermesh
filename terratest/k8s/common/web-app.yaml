@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: go-web-server
-          image: ttl.sh/littlejo-webapp:2h
+          image: IMAGE
           ports:
             - containerPort: 8080
           envFrom:
