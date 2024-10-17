@@ -1,12 +1,8 @@
 package test
 
-//go test -v cilium-clustermesh-global-services_test.go
-//go test -c -o test-binary cilium-clustermesh-global-services_test.go
-//./test-binary -test.v
-
 import (
+	_ "embed"
 	"fmt"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -20,14 +16,17 @@ import (
 	"scripts/lib"
 )
 
+//go:embed k8s/common/web-app.yaml
+var webAppYAML string
+
+//go:embed k8s/common/client.yaml
+var clientYAML string
+
 func TestCiliumClusterMeshGlobalService(t *testing.T) {
 	t.Parallel()
 
 	contexts, err := lib.GetKubeContexts(t)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	require.NoError(t, err, "Failed to get Kube contexts")
 	clusterNumber := len(contexts)
 	deploymentName := "client"
 	containerName := "client"
@@ -36,31 +35,21 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 
 	for _, c := range contexts {
 		cm := lib.CreateConfigMapString(clusterNumber, c)
-		webResourcePath, err := filepath.Abs("../web-server/k8s/common/web-app.yaml")
-		require.NoError(t, err)
 
-		options := k8s.NewKubectlOptions(c, "", namespaceName)
+		lib.CreateNamespace(t, c, namespaceName)
+		defer lib.DeleteNamespace(t, c, namespaceName)
+		defer lib.DeleteResourceToNamespace(t, c, namespaceName, webAppYAML)
 
-		k8s.CreateNamespace(t, options, namespaceName)
-		defer k8s.DeleteNamespace(t, options, namespaceName)
-		defer k8s.KubectlDelete(t, options, webResourcePath)
-
-		k8s.KubectlApplyFromString(t, options, cm)
-		k8s.KubectlApply(t, options, webResourcePath)
+		lib.ApplyResourceToNamespace(t, c, namespaceName, cm)
+		lib.ApplyResourceToNamespace(t, c, namespaceName, webAppYAML)
 	}
 
 	options := k8s.NewKubectlOptions(contexts[len(contexts)-1], "", namespaceName)
 	k8s.WaitUntilDeploymentAvailable(t, options, "web-app", 60, time.Duration(1)*time.Second)
 
 	for _, c := range contexts {
-		clientResourcePath, err := filepath.Abs("../web-server/k8s/common/client.yaml")
-		require.NoError(t, err)
-
-		options := k8s.NewKubectlOptions(c, "", namespaceName)
-
-		defer k8s.KubectlDelete(t, options, clientResourcePath)
-
-		k8s.KubectlApply(t, options, clientResourcePath)
+		defer lib.DeleteResourceToNamespace(t, c, namespaceName, clientYAML)
+		lib.ApplyResourceToNamespace(t, c, namespaceName, clientYAML)
 	}
 
 	for _, c := range contexts {

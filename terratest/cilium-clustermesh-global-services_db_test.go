@@ -30,7 +30,7 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 	deploymentName := "client"
 	containerName := "client"
 
-	for db_index, _ := range contexts {
+	for db_index := range contexts {
 		t.Run("TestCiliumClusterMeshGlobalServiceDB_"+contexts[db_index], func(t *testing.T) {
 			t.Parallel()
 			namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))

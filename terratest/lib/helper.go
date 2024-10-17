@@ -170,3 +170,23 @@ func MapToString(m map[string]int) string {
 	jsonData, _ := json.Marshal(m)
 	return string(jsonData)
 }
+
+func ApplyResourceToNamespace(t *testing.T, context string, namespaceName string, manifest string) {
+	options := k8s.NewKubectlOptions(context, "", namespaceName)
+	k8s.KubectlApplyFromString(t, options, manifest)
+}
+
+func DeleteResourceToNamespace(t *testing.T, context string, namespaceName string, manifest string) {
+	options := k8s.NewKubectlOptions(context, "", namespaceName)
+	k8s.KubectlDeleteFromString(t, options, manifest)
+}
+
+func CreateNamespace(t *testing.T, context string, namespaceName string) {
+	options := k8s.NewKubectlOptions(context, "", namespaceName)
+	k8s.CreateNamespace(t, options, namespaceName)
+}
+
+func DeleteNamespace(t *testing.T, context string, namespaceName string) {
+	options := k8s.NewKubectlOptions(context, "", namespaceName)
+	k8s.DeleteNamespace(t, options, namespaceName)
+}
