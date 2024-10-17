@@ -7,16 +7,13 @@ package test
 import (
 	_ "embed"
 	"fmt"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/random"
+	"github.com/stretchr/testify/require"
 
 	"scripts/lib"
 )
@@ -70,6 +67,7 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		lib.ApplyResourceToNamespace(t, c, namespaceName, clientYAML)
 	}
 
+	//Step Blue: Check
 	for _, c := range contexts {
 		pod := lib.RetrieveClient(t, c, namespaceName)
 		logsList, _ := lib.WaitForPodLogsNew(t, c, namespaceName, pod, clusterNumber, time.Duration(10)*time.Second)
@@ -77,42 +75,16 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-blue-%s.log", c), lib.MapToString(logsMap))
 	}
 
-	options = k8s.NewKubectlOptions(blue, "", namespaceName)
-	webSwitchPath := "../web-server/k8s/global-database-shared/web-app-shared-false.yaml"
-	webResourceSwitchPath, err := filepath.Abs(webSwitchPath)
-	k8s.KubectlApply(t, options, webResourceSwitchPath)
-
-	options = k8s.NewKubectlOptions(green, "", namespaceName)
-	webSwitchPath = "../web-server/k8s/global-database-shared/web-app-shared.yaml"
-	webResourceSwitchPath, err = filepath.Abs(webSwitchPath)
-	k8s.KubectlApply(t, options, webResourceSwitchPath)
+	lib.ApplyResourceToNamespace(t, blue, namespaceName, unsharedSvcWebAppYAML)
+	lib.ApplyResourceToNamespace(t, green, namespaceName, sharedSvcWebAppYAML)
 
 	waitContexts := []string{blue, green}
 
-	filters := metav1.ListOptions{
-		LabelSelector: "app=client",
-	}
-
+	//Step Green: Check
 	for _, c := range contexts {
-		options = k8s.NewKubectlOptions(c, "", namespaceName)
-		pod := k8s.ListPods(t, options, filters)[0]
-		lib.WaitForPodAllClustersLogs(t, options, pod.Name, "", waitContexts, clusterNumber, time.Duration(10)*time.Second)
-	}
-
-	for _, c := range contexts {
-		options := k8s.NewKubectlOptions(c, "", namespaceName)
-		filters := metav1.ListOptions{
-			LabelSelector: "app=client",
-		}
-		pod := k8s.ListPods(t, options, filters)[0]
-		logs := k8s.GetPodLogs(t, options, &pod, "")
-		logsList := strings.Split(logs, "\n")
-		LogsMap := lib.Uniq(logsList)
-		contextsAnalyze := []string{blue, green}
-		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-green-%s.log", c), lib.MapToString(LogsMap))
-		for _, c := range contextsAnalyze {
-			require.Contains(t, logsList, c)
-		}
-		require.Equal(t, len(LogsMap), 2)
+		pod := lib.RetrieveClient(t, c, namespaceName)
+		logsList, _ := lib.WaitForPodAllClustersLogsNew(t, c, namespaceName, pod, waitContexts, clusterNumber, time.Duration(10)*time.Second)
+		logsMap := lib.ValidateLogsSharedStep2(t, logsList, c, []string{blue, green})
+		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-green-%s.log", c), lib.MapToString(logsMap))
 	}
 }
