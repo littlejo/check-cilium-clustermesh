@@ -12,6 +12,8 @@ import (
 
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/shell"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func CreateConfigMapString(n int, name string) string {
@@ -189,4 +191,13 @@ func CreateNamespace(t *testing.T, context string, namespaceName string) {
 func DeleteNamespace(t *testing.T, context string, namespaceName string) {
 	options := k8s.NewKubectlOptions(context, "", namespaceName)
 	k8s.DeleteNamespace(t, options, namespaceName)
+}
+
+func RetrieveClient(t *testing.T, context string, namespaceName string) corev1.Pod {
+	options := k8s.NewKubectlOptions(context, "", namespaceName)
+	filters := metav1.ListOptions{
+		LabelSelector: "app=client",
+	}
+	k8s.WaitUntilDeploymentAvailable(t, options, "client", 60, time.Duration(1)*time.Second)
+	return k8s.ListPods(t, options, filters)[0]
 }
