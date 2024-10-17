@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/random"
@@ -28,7 +27,6 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 	contexts, err := lib.GetKubeContexts(t)
 	require.NoError(t, err, "Failed to get Kube contexts")
 	clusterNumber := len(contexts)
-	deploymentName := "client"
 	containerName := "client"
 
 	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
@@ -54,11 +52,7 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 
 	for _, c := range contexts {
 		options := k8s.NewKubectlOptions(c, "", namespaceName)
-		filters := metav1.ListOptions{
-			LabelSelector: "app=client",
-		}
-		k8s.WaitUntilDeploymentAvailable(t, options, deploymentName, 60, time.Duration(1)*time.Second)
-		pod := k8s.ListPods(t, options, filters)[0]
+		pod := lib.RetrieveClient(t, c, namespaceName)
 		lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, contexts, clusterNumber, time.Duration(10)*time.Second)
 		logs := k8s.GetPodLogs(t, options, &pod, containerName)
 		logsList := strings.Split(logs, "\n")
