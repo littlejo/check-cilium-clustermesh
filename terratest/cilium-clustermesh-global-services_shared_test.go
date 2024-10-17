@@ -78,13 +78,19 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	lib.ApplyResourceToNamespace(t, blue, namespaceName, unsharedSvcWebAppYAML)
 	lib.ApplyResourceToNamespace(t, green, namespaceName, sharedSvcWebAppYAML)
 
+	indexes := make(map[string]int)
+	for _, c := range contexts {
+		pod := lib.RetrieveClient(t, c, namespaceName)
+		indexes[c] = len(lib.GetLogsList(t, c, namespaceName, pod))
+	}
+
 	waitContexts := []string{blue, green}
 
 	//Step Green: Check
 	for _, c := range contexts {
 		pod := lib.RetrieveClient(t, c, namespaceName)
 		logsList, _ := lib.WaitForPodAllClustersLogsNew(t, c, namespaceName, pod, waitContexts, clusterNumber, time.Duration(10)*time.Second)
-		logsMap := lib.ValidateLogsSharedStep2(t, logsList, c, []string{blue, green})
+		logsMap := lib.ValidateLogsSharedStep2(t, logsList[indexes[c]:], c, []string{blue, green})
 		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-green-%s.log", c), lib.MapToString(logsMap))
 	}
 }
