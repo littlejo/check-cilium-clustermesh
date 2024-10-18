@@ -5,7 +5,6 @@ package test
 //./test-binary -test.v
 
 import (
-	_ "embed"
 	"fmt"
 	"strings"
 	"testing"
@@ -15,17 +14,15 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"scripts/lib"
+	"scripts/manifests"
 )
-
-//go:embed k8s/common/svc-web-app.yaml
-var svcWebAppYAML string
 
 func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 	contexts, err := lib.GetKubeContexts(t)
 	require.NoError(t, err, "Failed to get Kube contexts")
 	clusterNumber := len(contexts)
 	webAppImage := "ttl.sh/littlejo-webapp:2h"
-	webAppYAML = strings.Replace(webAppYAML, "IMAGE", webAppImage, 1)
+	webAppYAML := strings.Replace(manifests.WebAppYAML, "IMAGE", webAppImage, 1)
 
 	for db_index := range contexts {
 		t.Run("TestCiliumClusterMeshGlobalServiceDB_"+contexts[db_index], func(t *testing.T) {
@@ -36,7 +33,7 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 				cm := lib.CreateConfigMapString(c)
 				lib.CreateNamespace(t, c, namespaceName)
 
-				webSvcYAML := svcWebAppYAML
+				webSvcYAML := manifests.SvcWebAppYAML
 				if i == db_index {
 					webSvcYAML = webAppYAML
 				}
@@ -47,8 +44,8 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 			}
 
 			for _, c := range contexts {
-				defer lib.DeleteResourceToNamespace(t, c, namespaceName, clientYAML)
-				lib.ApplyResourceToNamespace(t, c, namespaceName, clientYAML)
+				defer lib.DeleteResourceToNamespace(t, c, namespaceName, manifests.ClientYAML)
+				lib.ApplyResourceToNamespace(t, c, namespaceName, manifests.ClientYAML)
 			}
 
 			for _, c := range contexts {

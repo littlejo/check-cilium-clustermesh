@@ -1,7 +1,6 @@
 package test
 
 import (
-	_ "embed"
 	"fmt"
 	"strings"
 	"testing"
@@ -12,13 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"scripts/lib"
+	"scripts/manifests"
 )
-
-//go:embed k8s/global-database-shared/svc-shared.yaml
-var svcWebAppTPLYAML string
-
-//go:embed k8s/common/deployment-web-app.yaml
-var deploymentWebAppYAML string
 
 func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	t.Parallel()
@@ -30,10 +24,10 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	green := contexts[clusterNumber-1]
 
 	webAppImage := "ttl.sh/littlejo-webapp:2h"
-	deploymentWebAppYAML = strings.Replace(deploymentWebAppYAML, "IMAGE", webAppImage, 1)
+	deploymentWebAppYAML := strings.Replace(manifests.DeploymentWebAppYAML, "IMAGE", webAppImage, 1)
 
-	sharedSvcWebAppYAML := strings.Replace(svcWebAppTPLYAML, "SHARED", "true", 1)
-	unsharedSvcWebAppYAML := strings.Replace(svcWebAppTPLYAML, "SHARED", "false", 1)
+	sharedSvcWebAppYAML := strings.Replace(manifests.SvcWebAppTPLYAML, "SHARED", "true", 1)
+	unsharedSvcWebAppYAML := strings.Replace(manifests.SvcWebAppTPLYAML, "SHARED", "false", 1)
 
 	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 
@@ -59,8 +53,8 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	k8s.WaitUntilDeploymentAvailable(t, options, "web-app", 60, time.Duration(1)*time.Second)
 
 	for _, c := range contexts {
-		defer lib.DeleteResourceToNamespace(t, c, namespaceName, clientYAML)
-		lib.ApplyResourceToNamespace(t, c, namespaceName, clientYAML)
+		defer lib.DeleteResourceToNamespace(t, c, namespaceName, manifests.ClientYAML)
+		lib.ApplyResourceToNamespace(t, c, namespaceName, manifests.ClientYAML)
 	}
 
 	//Step Blue: Check

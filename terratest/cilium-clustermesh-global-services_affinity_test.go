@@ -5,7 +5,6 @@ package test
 //./test-binary -test.v
 
 import (
-	_ "embed"
 	"fmt"
 	"strings"
 	"testing"
@@ -17,10 +16,8 @@ import (
 	"github.com/gruntwork-io/terratest/modules/random"
 
 	"scripts/lib"
+	"scripts/manifests"
 )
-
-//go:embed k8s/global-load-balancing-affinity/svc-web-app.yaml
-var svcWebAppAffYAML string
 
 func TestCiliumClusterMeshGlobalServiceAffinity(t *testing.T) {
 	t.Parallel()
@@ -29,7 +26,7 @@ func TestCiliumClusterMeshGlobalServiceAffinity(t *testing.T) {
 	require.NoError(t, err, "Failed to get Kube contexts")
 	clusterNumber := len(contexts)
 	webAppImage := "ttl.sh/littlejo-webapp:2h"
-	deploymentWebAppYAML = strings.Replace(deploymentWebAppYAML, "IMAGE", webAppImage, 1)
+	deploymentWebAppYAML := strings.Replace(manifests.DeploymentWebAppYAML, "IMAGE", webAppImage, 1)
 
 	index := 0
 
@@ -39,18 +36,18 @@ func TestCiliumClusterMeshGlobalServiceAffinity(t *testing.T) {
 		cm := lib.CreateConfigMapString(c)
 		lib.CreateNamespace(t, c, namespaceName)
 		lib.ApplyResourceToNamespace(t, c, namespaceName, cm)
-		lib.ApplyResourceToNamespace(t, c, namespaceName, svcWebAppAffYAML)
+		lib.ApplyResourceToNamespace(t, c, namespaceName, manifests.SvcWebAppAffYAML)
 		lib.ApplyResourceToNamespace(t, c, namespaceName, deploymentWebAppYAML)
 		defer lib.DeleteNamespace(t, c, namespaceName)
-		defer lib.DeleteResourceToNamespace(t, c, namespaceName, svcWebAppAffYAML)
+		defer lib.DeleteResourceToNamespace(t, c, namespaceName, manifests.SvcWebAppAffYAML)
 	}
 
 	options := k8s.NewKubectlOptions(contexts[len(contexts)-1], "", namespaceName)
 	k8s.WaitUntilDeploymentAvailable(t, options, "web-app", 60, time.Duration(1)*time.Second)
 
 	for _, c := range contexts {
-		defer lib.DeleteResourceToNamespace(t, c, namespaceName, clientYAML)
-		lib.ApplyResourceToNamespace(t, c, namespaceName, clientYAML)
+		defer lib.DeleteResourceToNamespace(t, c, namespaceName, manifests.ClientYAML)
+		lib.ApplyResourceToNamespace(t, c, namespaceName, manifests.ClientYAML)
 	}
 
 	//Step 1: Check Local Affinity

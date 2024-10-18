@@ -1,7 +1,6 @@
 package test
 
 import (
-	_ "embed"
 	"fmt"
 	"strings"
 	"testing"
@@ -13,13 +12,8 @@ import (
 	"github.com/gruntwork-io/terratest/modules/random"
 
 	"scripts/lib"
+	"scripts/manifests"
 )
-
-//go:embed k8s/common/web-app.yaml
-var webAppYAML string
-
-//go:embed k8s/common/client.yaml
-var clientYAML string
 
 func TestCiliumClusterMeshGlobalService(t *testing.T) {
 	t.Parallel()
@@ -29,7 +23,7 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 	clusterNumber := len(contexts)
 
 	webAppImage := "ttl.sh/littlejo-webapp:2h"
-	webAppYAML = strings.Replace(webAppYAML, "IMAGE", webAppImage, 1)
+	webAppYAML := strings.Replace(manifests.WebAppYAML, "IMAGE", webAppImage, 1)
 
 	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 
@@ -48,8 +42,8 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 	k8s.WaitUntilDeploymentAvailable(t, options, "web-app", 60, time.Duration(1)*time.Second)
 
 	for _, c := range contexts {
-		defer lib.DeleteResourceToNamespace(t, c, namespaceName, clientYAML)
-		lib.ApplyResourceToNamespace(t, c, namespaceName, clientYAML)
+		defer lib.DeleteResourceToNamespace(t, c, namespaceName, manifests.ClientYAML)
+		lib.ApplyResourceToNamespace(t, c, namespaceName, manifests.ClientYAML)
 	}
 
 	for _, c := range contexts {

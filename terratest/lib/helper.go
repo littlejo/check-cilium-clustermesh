@@ -10,9 +10,9 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/shell"
+	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -26,9 +26,9 @@ data:
   CLUSTER: "{{.Cluster}}"`
 
 	data := struct {
-		Cluster        string
+		Cluster string
 	}{
-		Cluster:        name,
+		Cluster: name,
 	}
 
 	var result bytes.Buffer
