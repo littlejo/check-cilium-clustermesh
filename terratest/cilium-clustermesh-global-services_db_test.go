@@ -22,7 +22,7 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 	require.NoError(t, err, "Failed to get Kube contexts")
 	clusterNumber := len(contexts)
 	webAppImage := "ttl.sh/littlejo-webapp:2h"
-	webAppYAML := strings.Replace(manifests.WebAppYAML, "IMAGE", webAppImage, 1)
+	deploymentWebAppYAML := strings.Replace(manifests.DeploymentWebAppYAML, "IMAGE", webAppImage, 1)
 
 	for db_index := range contexts {
 		t.Run("TestCiliumClusterMeshGlobalServiceDB_"+contexts[db_index], func(t *testing.T) {
@@ -35,12 +35,12 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 
 				webSvcYAML := manifests.SvcWebAppYAML
 				if i == db_index {
-					webSvcYAML = webAppYAML
+					lib.ApplyResourceToNamespace(t, c, namespaceName, deploymentWebAppYAML)
+					defer lib.DeleteResourceToNamespace(t, c, namespaceName, deploymentWebAppYAML)
 				}
 				lib.ApplyResourceToNamespace(t, c, namespaceName, webSvcYAML)
 				lib.ApplyResourceToNamespace(t, c, namespaceName, cm)
 				defer lib.DeleteNamespace(t, c, namespaceName)
-				defer lib.DeleteResourceToNamespace(t, c, namespaceName, webSvcYAML)
 			}
 
 			for _, c := range contexts {
