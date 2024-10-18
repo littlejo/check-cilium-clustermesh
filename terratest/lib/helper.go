@@ -12,6 +12,7 @@ import (
 
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/shell"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -94,47 +95,6 @@ func CreateFile(fileName string, content string) error {
 	return nil
 }
 
-func WaitForPodLogs(t *testing.T, options *k8s.KubectlOptions, podName string, containerName string, maxRetries int, retryInterval time.Duration) (string, error) {
-	var logs string
-	pods := k8s.GetPod(t, options, podName)
-
-	for i := 0; i < maxRetries; i++ {
-		logs = k8s.GetPodLogs(t, options, pods, containerName)
-
-		if logs != "" {
-			return logs, nil
-		}
-
-		time.Sleep(retryInterval)
-	}
-
-	return "", fmt.Errorf("Impossible to retrieve after %d tries", maxRetries)
-}
-
-func WaitForPodAllClustersLogs(t *testing.T, options *k8s.KubectlOptions, podName string, containerName string, contexts []string, maxRetries int, retryInterval time.Duration) (string, error) {
-	var logs string
-	pods := k8s.GetPod(t, options, podName)
-
-	for i := 0; i < maxRetries; i++ {
-		logs = k8s.GetPodLogs(t, options, pods, containerName)
-		logsList := strings.Split(logs, "\n")
-		allPresent := true
-		for _, c := range contexts {
-			if !contains(logsList, c) {
-				allPresent = false
-			}
-		}
-
-		if allPresent {
-			return logs, nil
-		}
-
-		time.Sleep(retryInterval)
-	}
-
-	return "", fmt.Errorf("Impossible to retrieve after %d tries", maxRetries)
-}
-
 func contains(list []string, item string) bool {
 	for _, v := range list {
 		if v == item {
@@ -201,6 +161,15 @@ func RetrieveClient(t *testing.T, context string, namespaceName string) corev1.P
 	}
 	k8s.WaitUntilDeploymentAvailable(t, options, "client", 60, time.Duration(1)*time.Second)
 	return k8s.ListPods(t, options, filters)[0]
+}
+
+func RetrieveClusterName(t *testing.T, context string, namespaceName string) string {
+	options := k8s.NewKubectlOptions(context, "", namespaceName)
+	ciliumConfigMap := k8s.GetConfigMap(t, options, "cilium-config")
+	t.Log("Value of cm is:", ciliumConfigMap.Data)
+	clusterName, exists := ciliumConfigMap.Data["cluster-name"]
+	assert.True(t, exists, "Key 'cluster-name' should exist in the ConfigMap")
+	return clusterName
 }
 
 func GetLogsList(t *testing.T, context string, namespaceName string, pod corev1.Pod) []string {
