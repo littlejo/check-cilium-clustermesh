@@ -255,6 +255,14 @@ func ValidateLogsGlobalServices(t *testing.T, logsList []string, contexts []stri
 	return logsMap
 }
 
+func ValidateLogsDB(t *testing.T, logsList []string, expectedContext string) map[string]int {
+	logsMap := Uniq(logsList)
+	t.Log("Value of logs is:", MapToString(logsMap))
+	require.Contains(t, logsList, expectedContext)
+	require.Equal(t, len(logsMap), 1)
+	return logsMap
+}
+
 func ValidateLogsSharedStep1(t *testing.T, logsList []string, context string, expectedContexts []string) map[string]int {
 	logsMap := Uniq(logsList)
 	t.Log("Value of logs is:", MapToString(logsMap))

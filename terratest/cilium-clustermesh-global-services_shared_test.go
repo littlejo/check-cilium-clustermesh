@@ -1,9 +1,5 @@
 package test
 
-//go test -v cilium-clustermesh-global-services_test.go
-//go test -c -o test-binary cilium-clustermesh-global-services_test.go
-//./test-binary -test.v
-
 import (
 	_ "embed"
 	"fmt"
@@ -19,7 +15,7 @@ import (
 )
 
 //go:embed k8s/global-database-shared/svc-shared.yaml
-var svcWebAppYAML string
+var svcWebAppTPLYAML string
 
 //go:embed k8s/common/deployment-web-app.yaml
 var deploymentWebAppYAML string
@@ -36,8 +32,8 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	webAppImage := "ttl.sh/littlejo-webapp:2h"
 	deploymentWebAppYAML = strings.Replace(deploymentWebAppYAML, "IMAGE", webAppImage, 1)
 
-	sharedSvcWebAppYAML := strings.Replace(svcWebAppYAML, "SHARED", "true", 1)
-	unsharedSvcWebAppYAML := strings.Replace(svcWebAppYAML, "SHARED", "false", 1)
+	sharedSvcWebAppYAML := strings.Replace(svcWebAppTPLYAML, "SHARED", "true", 1)
+	unsharedSvcWebAppYAML := strings.Replace(svcWebAppTPLYAML, "SHARED", "false", 1)
 
 	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 
@@ -70,6 +66,7 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	//Step Blue: Check
 	for _, c := range contexts {
 		pod := lib.RetrieveClient(t, c, namespaceName)
+		//TOFIX
 		logsList, _ := lib.WaitForPodLogsNew(t, c, namespaceName, pod, 10, clusterNumber, time.Duration(10)*time.Second)
 		logsMap := lib.ValidateLogsSharedStep1(t, logsList, c, []string{blue, green})
 		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-blue-%s.log", c), lib.MapToString(logsMap))
