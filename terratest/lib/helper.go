@@ -10,10 +10,9 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/shell"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -212,52 +211,4 @@ func WaitForPodAllClustersLogs(t *testing.T, context string, namespaceName strin
 	}
 
 	return logsList, fmt.Errorf("Impossible to retrieve after %d tries", maxRetries)
-}
-
-func ValidateLogsGlobalServices(t *testing.T, logsList []string, contexts []string) map[string]int {
-	logsMap := Uniq(logsList)
-	t.Log("Value of logs is:", MapToString(logsMap))
-	require.Equal(t, len(logsMap), len(contexts))
-	for _, c := range contexts {
-		require.Contains(t, logsList, c)
-	}
-	return logsMap
-}
-
-func ValidateLogsDB(t *testing.T, logsList []string, expectedContext string) map[string]int {
-	logsMap := Uniq(logsList)
-	t.Log("Value of logs is:", MapToString(logsMap))
-	require.Contains(t, logsList, expectedContext)
-	require.Equal(t, len(logsMap), 1)
-	return logsMap
-}
-
-func ValidateLogsSharedStep1(t *testing.T, logsList []string, context string, expectedContexts []string) map[string]int {
-	logsMap := Uniq(logsList)
-	t.Log("Value of logs is:", MapToString(logsMap))
-	expectedCount := 2
-	if context != expectedContexts[1] {
-		expectedContexts = []string{expectedContexts[0]}
-		expectedCount = 1
-	}
-	require.Equal(t, len(logsMap), expectedCount)
-	for _, c := range expectedContexts {
-		require.Contains(t, logsList, c)
-	}
-	return logsMap
-}
-
-func ValidateLogsSharedStep2(t *testing.T, logsList []string, context string, expectedContexts []string) map[string]int {
-	logsMap := Uniq(logsList)
-	t.Log("Value of logs is:", MapToString(logsMap))
-	expectedCount := 2
-	if context != expectedContexts[0] {
-		expectedContexts = []string{expectedContexts[1]}
-		expectedCount = 1
-	}
-	require.Equal(t, len(logsMap), expectedCount)
-	for _, c := range expectedContexts {
-		require.Contains(t, logsList, c)
-	}
-	return logsMap
 }
