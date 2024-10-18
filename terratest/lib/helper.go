@@ -102,9 +102,11 @@ func contains(list []string, item string) bool {
 }
 
 func GetKubeContexts(t *testing.T) ([]string, error) {
+	silentLogger := logger.New(logger.Discard)
 	kubectlCmd := shell.Command{
 		Command: "kubectl",
 		Args:    []string{"config", "get-contexts", "-o", "name"},
+		Logger:  silentLogger,
 	}
 
 	output, err := shell.RunCommandAndGetStdOutE(t, kubectlCmd)
