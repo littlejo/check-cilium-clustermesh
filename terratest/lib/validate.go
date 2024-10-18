@@ -32,6 +32,7 @@ func ValidateLogsSharedStep1(t *testing.T, logsList []string, context string, ex
 		expectedContexts = []string{expectedContexts[0]}
 		expectedCount = 1
 	}
+	t.Logf("Context: %s, Expected Contexts: %v, Expected Count: %d", context, expectedContexts, expectedCount)
 	require.Equal(t, len(logsMap), expectedCount)
 	for _, c := range expectedContexts {
 		require.Contains(t, logsList, c)
@@ -47,6 +48,7 @@ func ValidateLogsSharedStep2(t *testing.T, logsList []string, context string, ex
 		expectedContexts = []string{expectedContexts[1]}
 		expectedCount = 1
 	}
+	t.Logf("Context: %s, Expected Contexts: %v, Expected Count: %d", context, expectedContexts, expectedCount)
 	require.Equal(t, len(logsMap), expectedCount)
 	for _, c := range expectedContexts {
 		require.Contains(t, logsList, c)
