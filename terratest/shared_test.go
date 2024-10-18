@@ -22,6 +22,7 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	clusterNumber := len(contexts)
 	blue := contexts[0]
 	green := contexts[clusterNumber-1]
+	blueGreenContexts := []string{blue, green}
 
 	webAppImage := lib.RetrieveWebAppImage(manifests.WebAppImage)
 	deploymentWebAppYAML := strings.Replace(manifests.DeploymentWebAppYAML, "IMAGE", webAppImage, 1)
@@ -61,12 +62,14 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	for _, c := range contexts {
 		pod := lib.RetrieveClient(t, c, namespaceName)
 		//TOFIX
-		logsList, _ := lib.WaitForPodLogs(t, c, namespaceName, pod, 10, clusterNumber, time.Duration(10)*time.Second)
-		logsMap := make(map[string]int)
+		logsList, err := lib.WaitForPodLogs(t, c, namespaceName, pod, 10, clusterNumber, time.Duration(10)*time.Second)
+		require.NoError(t, err, "Error waiting for pod logs in context: %s", c)
+
+		var logsMap map[string]int
 		if c != green {
 			logsMap = lib.ValidateLogsOnlyOneValue(t, logsList, blue)
 		} else {
-			logsMap = lib.ValidateLogsAllValues(t, logsList, []string{blue, green})
+			logsMap = lib.ValidateLogsAllValues(t, logsList, blueGreenContexts)
 		}
 		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-blue-%s.log", c), lib.MapToString(logsMap))
 	}
@@ -80,17 +83,17 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		indexes[c] = len(lib.GetLogsList(t, c, namespaceName, pod))
 	}
 
-	waitContexts := []string{blue, green}
-
 	//Step Green: Check
 	for _, c := range contexts {
 		pod := lib.RetrieveClient(t, c, namespaceName)
-		logsList, _ := lib.WaitForPodAllClustersLogs(t, c, namespaceName, pod, waitContexts, clusterNumber, time.Duration(10)*time.Second)
-		logsMap := make(map[string]int)
+		logsList, err := lib.WaitForPodAllClustersLogs(t, c, namespaceName, pod, blueGreenContexts, clusterNumber, time.Duration(10)*time.Second)
+		require.NoError(t, err, "Error waiting for pod logs in context: %s", c)
+		endLogsList := logsList[indexes[c]:]
+		var logsMap map[string]int
 		if c != blue {
-			logsMap = lib.ValidateLogsOnlyOneValue(t, logsList, green)
+			logsMap = lib.ValidateLogsOnlyOneValue(t, endLogsList, green)
 		} else {
-			logsMap = lib.ValidateLogsAllValues(t, logsList, []string{blue, green})
+			logsMap = lib.ValidateLogsAllValues(t, endLogsList, blueGreenContexts)
 		}
 		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-green-%s.log", c), lib.MapToString(logsMap))
 	}
