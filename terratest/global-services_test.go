@@ -22,7 +22,7 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 	require.NoError(t, err, "Failed to get Kube contexts")
 	clusterNumber := len(contexts)
 
-	webAppImage := "ttl.sh/littlejo-webapp:2h"
+	webAppImage := lib.RetrieveWebAppImage(manifests.WebAppImage)
 	deploymentWebAppYAML := strings.Replace(manifests.DeploymentWebAppYAML, "IMAGE", webAppImage, 1)
 
 	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))

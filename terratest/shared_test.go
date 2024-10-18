@@ -23,7 +23,7 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	blue := contexts[0]
 	green := contexts[clusterNumber-1]
 
-	webAppImage := "ttl.sh/littlejo-webapp:2h"
+	webAppImage := lib.RetrieveWebAppImage(manifests.WebAppImage)
 	deploymentWebAppYAML := strings.Replace(manifests.DeploymentWebAppYAML, "IMAGE", webAppImage, 1)
 
 	sharedSvcWebAppYAML := strings.Replace(manifests.SvcWebAppTPLYAML, "SHARED", "true", 1)
