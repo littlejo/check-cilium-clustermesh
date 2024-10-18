@@ -21,7 +21,7 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 	contexts, err := lib.GetKubeContexts(t)
 	require.NoError(t, err, "Failed to get Kube contexts")
 	clusterNumber := len(contexts)
-	webAppImage := "ttl.sh/littlejo-webapp:2h"
+	webAppImage := lib.RetrieveWebAppImage(manifests.WebAppImage)
 	deploymentWebAppYAML := strings.Replace(manifests.DeploymentWebAppYAML, "IMAGE", webAppImage, 1)
 
 	for db_index := range contexts {

@@ -168,6 +168,14 @@ func RetrieveClusterName(t *testing.T, context string, namespaceName string) str
 	return clusterName
 }
 
+func RetrieveWebAppImage(webAppImage string) string {
+	webAppImageEnv := os.Getenv("WEBAPP_IMAGE")
+	if webAppImageEnv != "" {
+		return webAppImageEnv
+	}
+	return webAppImage
+}
+
 func GetLogsList(t *testing.T, context string, namespaceName string, pod corev1.Pod) []string {
 	options := k8s.NewKubectlOptions(context, "", namespaceName)
 	logs := k8s.GetPodLogs(t, options, &pod, "")
