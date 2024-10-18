@@ -67,7 +67,7 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	for _, c := range contexts {
 		pod := lib.RetrieveClient(t, c, namespaceName)
 		//TOFIX
-		logsList, _ := lib.WaitForPodLogsNew(t, c, namespaceName, pod, 10, clusterNumber, time.Duration(10)*time.Second)
+		logsList, _ := lib.WaitForPodLogs(t, c, namespaceName, pod, 10, clusterNumber, time.Duration(10)*time.Second)
 		logsMap := lib.ValidateLogsSharedStep1(t, logsList, c, []string{blue, green})
 		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-blue-%s.log", c), lib.MapToString(logsMap))
 	}
@@ -86,7 +86,7 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	//Step Green: Check
 	for _, c := range contexts {
 		pod := lib.RetrieveClient(t, c, namespaceName)
-		logsList, _ := lib.WaitForPodAllClustersLogsNew(t, c, namespaceName, pod, waitContexts, clusterNumber, time.Duration(10)*time.Second)
+		logsList, _ := lib.WaitForPodAllClustersLogs(t, c, namespaceName, pod, waitContexts, clusterNumber, time.Duration(10)*time.Second)
 		logsMap := lib.ValidateLogsSharedStep2(t, logsList[indexes[c]:], c, []string{blue, green})
 		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-green-%s.log", c), lib.MapToString(logsMap))
 	}
