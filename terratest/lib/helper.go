@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gruntwork-io/terratest/modules/k8s"
+	"github.com/gruntwork-io/terratest/modules/logger"
 	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
@@ -185,7 +186,14 @@ func RetrieveWebAppImage(webAppImage string) string {
 }
 
 func GetLogsList(t *testing.T, context string, namespaceName string, pod corev1.Pod) []string {
-	options := k8s.NewKubectlOptions(context, "", namespaceName)
+	silentLogger := logger.New(logger.Discard)
+
+	options := &k8s.KubectlOptions{
+		ContextName: context,
+		Namespace:   namespaceName,
+		ConfigPath:  "",
+		Logger:      silentLogger,
+	}
 	logs := k8s.GetPodLogs(t, options, &pod, "")
 	return strings.Split(logs, "\n")
 }
