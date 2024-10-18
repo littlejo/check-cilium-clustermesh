@@ -162,7 +162,6 @@ func RetrieveClient(t *testing.T, context string, namespaceName string) corev1.P
 func RetrieveClusterName(t *testing.T, context string, namespaceName string) string {
 	options := k8s.NewKubectlOptions(context, "", namespaceName)
 	ciliumConfigMap := k8s.GetConfigMap(t, options, "cilium-config")
-	t.Log("Value of cm is:", ciliumConfigMap.Data)
 	clusterName, exists := ciliumConfigMap.Data["cluster-name"]
 	assert.True(t, exists, "Key 'cluster-name' should exist in the ConfigMap")
 	return clusterName
