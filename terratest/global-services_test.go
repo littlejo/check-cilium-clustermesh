@@ -39,7 +39,7 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 		lib.ApplyResourceToNamespace(t, c, namespaceName, manifests.SvcWebAppYAML)
 	}
 
-	options := k8s.NewKubectlOptions(contexts[len(contexts)-1], "", namespaceName)
+	options := lib.NewKubectlOptions(contexts[len(contexts)-1], namespaceName)
 	k8s.WaitUntilDeploymentAvailable(t, options, "web-app", 60, time.Duration(1)*time.Second)
 
 	for _, c := range contexts {

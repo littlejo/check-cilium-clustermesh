@@ -140,28 +140,28 @@ func ApplyResourceToNamespace(t *testing.T, context string, namespaceName string
 	for resource, name := range resourcesMap {
 		Log(t, context, "✨ Creating "+resource+" "+name)
 	}
-	options := k8s.NewKubectlOptions(context, "", namespaceName)
+	options := NewKubectlOptions(context, namespaceName)
 	k8s.KubectlApplyFromString(t, options, manifest)
 }
 
 func DeleteResourceToNamespace(t *testing.T, context string, namespaceName string, manifest string) {
-	options := k8s.NewKubectlOptions(context, "", namespaceName)
+	options := NewKubectlOptions(context, namespaceName)
 	k8s.KubectlDeleteFromString(t, options, manifest)
 }
 
 func CreateNamespace(t *testing.T, context string, namespaceName string) {
 	Log(t, context, "✨ Creating namespace "+namespaceName)
-	options := k8s.NewKubectlOptions(context, "", namespaceName)
+	options := NewKubectlOptions(context, namespaceName)
 	k8s.CreateNamespace(t, options, namespaceName)
 }
 
 func DeleteNamespace(t *testing.T, context string, namespaceName string) {
-	options := k8s.NewKubectlOptions(context, "", namespaceName)
+	options := NewKubectlOptions(context, namespaceName)
 	k8s.DeleteNamespace(t, options, namespaceName)
 }
 
 func RetrieveClient(t *testing.T, context string, namespaceName string) corev1.Pod {
-	options := k8s.NewKubectlOptions(context, "", namespaceName)
+	options := NewKubectlOptions(context, namespaceName)
 	filters := metav1.ListOptions{
 		LabelSelector: "app=client",
 	}
@@ -170,7 +170,7 @@ func RetrieveClient(t *testing.T, context string, namespaceName string) corev1.P
 }
 
 func RetrieveClusterName(t *testing.T, context string, namespaceName string) string {
-	options := k8s.NewKubectlOptions(context, "", namespaceName)
+	options := NewKubectlOptions(context, namespaceName)
 	ciliumConfigMap := k8s.GetConfigMap(t, options, "cilium-config")
 	clusterName, exists := ciliumConfigMap.Data["cluster-name"]
 	assert.True(t, exists, "Key 'cluster-name' should exist in the ConfigMap")
@@ -183,6 +183,17 @@ func RetrieveWebAppImage(webAppImage string) string {
 		return webAppImageEnv
 	}
 	return webAppImage
+}
+
+func NewKubectlOptions(context string, namespaceName string) *k8s.KubectlOptions {
+	silentLogger := logger.New(logger.Discard)
+
+	return &k8s.KubectlOptions{
+		ContextName: context,
+		Namespace:   namespaceName,
+		ConfigPath:  "",
+		Logger:      silentLogger,
+	}
 }
 
 func GetLogsList(t *testing.T, context string, namespaceName string, pod corev1.Pod) []string {

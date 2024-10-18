@@ -42,7 +42,7 @@ func TestCiliumClusterMeshGlobalServiceAffinity(t *testing.T) {
 		defer lib.DeleteResourceToNamespace(t, c, namespaceName, manifests.SvcWebAppAffYAML)
 	}
 
-	options := k8s.NewKubectlOptions(contexts[len(contexts)-1], "", namespaceName)
+	options := lib.NewKubectlOptions(contexts[len(contexts)-1], namespaceName)
 	k8s.WaitUntilDeploymentAvailable(t, options, "web-app", 60, time.Duration(1)*time.Second)
 
 	for _, c := range contexts {
