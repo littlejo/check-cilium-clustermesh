@@ -62,7 +62,12 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		pod := lib.RetrieveClient(t, c, namespaceName)
 		//TOFIX
 		logsList, _ := lib.WaitForPodLogs(t, c, namespaceName, pod, 10, clusterNumber, time.Duration(10)*time.Second)
-		logsMap := lib.ValidateLogsSharedStep1(t, logsList, c, []string{blue, green})
+		logsMap := make(map[string]int)
+		if c != green {
+			logsMap = lib.ValidateLogsOnlyOneValue(t, logsList, blue)
+		} else {
+			logsMap = lib.ValidateLogsAllValues(t, logsList, []string{blue, green})
+		}
 		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-blue-%s.log", c), lib.MapToString(logsMap))
 	}
 
@@ -81,7 +86,12 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	for _, c := range contexts {
 		pod := lib.RetrieveClient(t, c, namespaceName)
 		logsList, _ := lib.WaitForPodAllClustersLogs(t, c, namespaceName, pod, waitContexts, clusterNumber, time.Duration(10)*time.Second)
-		logsMap := lib.ValidateLogsSharedStep2(t, logsList[indexes[c]:], c, []string{blue, green})
+		logsMap := make(map[string]int)
+		if c != blue {
+			logsMap = lib.ValidateLogsOnlyOneValue(t, logsList, green)
+		} else {
+			logsMap = lib.ValidateLogsAllValues(t, logsList, []string{blue, green})
+		}
 		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-green-%s.log", c), lib.MapToString(logsMap))
 	}
 }
