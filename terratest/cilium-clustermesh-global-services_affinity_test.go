@@ -56,18 +56,18 @@ func TestCiliumClusterMeshGlobalServiceAffinity(t *testing.T) {
 	//Step 1: Check Local Affinity
 	for _, c := range contexts {
 		pod := lib.RetrieveClient(t, c, namespaceName)
-		logsList, _ := lib.WaitForPodLogsNew(t, c, namespaceName, pod, 10, clusterNumber, time.Duration(10)*time.Second)
+		logsList, _ := lib.WaitForPodLogs(t, c, namespaceName, pod, 10, clusterNumber, time.Duration(10)*time.Second)
 		lib.ValidateLogsDB(t, logsList, c)
 	}
 
 	lib.DeleteResourceToNamespace(t, contexts[index], namespaceName, deploymentWebAppYAML)
 	pod := lib.RetrieveClient(t, contexts[index], namespaceName)
-	lib.WaitForPodAllClustersLogsNew(t, contexts[index], namespaceName, pod, contexts, clusterNumber, time.Duration(10)*time.Second)
+	lib.WaitForPodAllClustersLogs(t, contexts[index], namespaceName, pod, contexts, clusterNumber, time.Duration(10)*time.Second)
 
 	//Step 2: Check Local Affinity with one failure
 	for _, c := range contexts {
 		pod := lib.RetrieveClient(t, c, namespaceName)
-		logsList, _ := lib.WaitForPodLogsNew(t, c, namespaceName, pod, 10, clusterNumber, time.Duration(10)*time.Second)
+		logsList, _ := lib.WaitForPodLogs(t, c, namespaceName, pod, 10, clusterNumber, time.Duration(10)*time.Second)
 		if c != contexts[index] {
 			lib.ValidateLogsDB(t, logsList, c)
 		} else {

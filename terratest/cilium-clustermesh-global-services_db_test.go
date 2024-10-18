@@ -53,7 +53,7 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 
 			for _, c := range contexts {
 				pod := lib.RetrieveClient(t, c, namespaceName)
-				logsList, _ := lib.WaitForPodLogsNew(t, c, namespaceName, pod, 10, clusterNumber, time.Duration(10)*time.Second)
+				logsList, _ := lib.WaitForPodLogs(t, c, namespaceName, pod, 10, clusterNumber, time.Duration(10)*time.Second)
 				logsMap := lib.ValidateLogsDB(t, logsList, contexts[db_index])
 				lib.CreateFile(fmt.Sprintf("/tmp/client-db-%s-%s.log", contexts[db_index], c), lib.MapToString(logsMap))
 			}

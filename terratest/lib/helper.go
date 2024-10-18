@@ -178,7 +178,7 @@ func GetLogsList(t *testing.T, context string, namespaceName string, pod corev1.
 	return strings.Split(logs, "\n")
 }
 
-func WaitForPodLogsNew(t *testing.T, context string, namespaceName string, pod corev1.Pod, lineNumber int, maxRetries int, retryInterval time.Duration) ([]string, error) {
+func WaitForPodLogs(t *testing.T, context string, namespaceName string, pod corev1.Pod, lineNumber int, maxRetries int, retryInterval time.Duration) ([]string, error) {
 	var logsList []string
 	for i := 0; i < maxRetries; i++ {
 		logsList = GetLogsList(t, context, namespaceName, pod)
@@ -193,7 +193,7 @@ func WaitForPodLogsNew(t *testing.T, context string, namespaceName string, pod c
 	return logsList, fmt.Errorf("Impossible to retrieve after %d tries", maxRetries)
 }
 
-func WaitForPodAllClustersLogsNew(t *testing.T, context string, namespaceName string, pod corev1.Pod, contexts []string, maxRetries int, retryInterval time.Duration) ([]string, error) {
+func WaitForPodAllClustersLogs(t *testing.T, context string, namespaceName string, pod corev1.Pod, contexts []string, maxRetries int, retryInterval time.Duration) ([]string, error) {
 	var logsList []string
 	for i := 0; i < maxRetries; i++ {
 		logsList = GetLogsList(t, context, namespaceName, pod)
