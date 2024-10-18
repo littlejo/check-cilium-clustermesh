@@ -33,7 +33,7 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 			namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 
 			for i, c := range contexts {
-				cm := lib.CreateConfigMapString(clusterNumber, c)
+				cm := lib.CreateConfigMapString(c)
 				lib.CreateNamespace(t, c, namespaceName)
 
 				webSvcYAML := svcWebAppYAML

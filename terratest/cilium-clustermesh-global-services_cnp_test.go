@@ -35,7 +35,7 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 	t.Logf("Contexts to Cluster Names map: %v", contextsCiliumClusterName)
 
 	for i, c := range contexts {
-		cm := lib.CreateConfigMapString(clusterNumber, c)
+		cm := lib.CreateConfigMapString(c)
 
 		nextIndex := (i + 1) % len(contexts)
 		nextContext := contexts[nextIndex]
