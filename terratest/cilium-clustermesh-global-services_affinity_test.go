@@ -36,7 +36,7 @@ func TestCiliumClusterMeshGlobalServiceAffinity(t *testing.T) {
 	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 
 	for _, c := range contexts {
-		cm := lib.CreateConfigMapString(clusterNumber, c)
+		cm := lib.CreateConfigMapString(c)
 		lib.CreateNamespace(t, c, namespaceName)
 		lib.ApplyResourceToNamespace(t, c, namespaceName, cm)
 		lib.ApplyResourceToNamespace(t, c, namespaceName, svcWebAppAffYAML)

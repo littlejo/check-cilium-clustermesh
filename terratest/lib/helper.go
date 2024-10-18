@@ -17,21 +17,18 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func CreateConfigMapString(n int, name string) string {
+func CreateConfigMapString(name string) string {
 	tmpl := `apiVersion: v1
 kind: ConfigMap
 metadata:
   name: cluster
 data:
-  CLUSTER: "{{.Cluster}}"
-  CLUSTERS_NUMBER: "{{.ClustersNumber}}"`
+  CLUSTER: "{{.Cluster}}"`
 
 	data := struct {
 		Cluster        string
-		ClustersNumber int
 	}{
 		Cluster:        name,
-		ClustersNumber: n,
 	}
 
 	var result bytes.Buffer
