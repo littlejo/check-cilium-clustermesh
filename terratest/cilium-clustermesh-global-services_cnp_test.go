@@ -16,6 +16,7 @@ import (
 	"github.com/gruntwork-io/terratest/modules/random"
 
 	"scripts/lib"
+	"scripts/manifests"
 )
 
 func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
@@ -25,6 +26,9 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 	require.NoError(t, err, "Failed to get Kube contexts")
 	clusterNumber := len(contexts)
 	ciliumNamespace := "kube-system"
+
+	webAppImage := "ttl.sh/littlejo-webapp:2h"
+	webAppYAML := strings.Replace(manifests.WebAppYAML, "IMAGE", webAppImage, 1)
 
 	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 	contextsCiliumClusterName := make(map[string]string)
@@ -53,8 +57,8 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 	k8s.WaitUntilDeploymentAvailable(t, options, "web-app", 60, time.Duration(1)*time.Second)
 
 	for _, c := range contexts {
-		defer lib.DeleteResourceToNamespace(t, c, namespaceName, clientYAML)
-		lib.ApplyResourceToNamespace(t, c, namespaceName, clientYAML)
+		defer lib.DeleteResourceToNamespace(t, c, namespaceName, manifests.ClientYAML)
+		lib.ApplyResourceToNamespace(t, c, namespaceName, manifests.ClientYAML)
 	}
 
 	for i, c := range contexts {
