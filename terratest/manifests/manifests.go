@@ -19,4 +19,4 @@ var DeploymentWebAppYAML string
 //go:embed common/svc-web-app.yaml
 var SvcWebAppYAML string
 
-var WebAppImage string = "ttl.sh/littlejo-webapp:2h"
+var WebAppImage string = "littlejo-webapp:latest"
