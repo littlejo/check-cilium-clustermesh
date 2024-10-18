@@ -51,7 +51,7 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 		pod := lib.RetrieveClient(t, c, namespaceName)
 		lib.WaitForPodAllClustersLogs(t, c, namespaceName, pod, contexts, clusterNumber, time.Duration(10)*time.Second)
 		logsList := lib.GetLogsList(t, c, namespaceName, pod)
-		logsMap := lib.ValidateLogsGlobalServices(t, logsList, contexts)
+		logsMap := lib.ValidateLogsAllValues(t, logsList, contexts)
 		lib.CreateFile(fmt.Sprintf("/tmp/client-%s.log", c), lib.MapToString(logsMap))
 	}
 }

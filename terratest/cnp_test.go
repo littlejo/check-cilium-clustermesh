@@ -66,7 +66,7 @@ func TestCiliumClusterMeshGlobalServiceCiliumNetworkPolicy(t *testing.T) {
 		previousContext := contexts[(i-1+len(contexts))%len(contexts)]
 		pod := lib.RetrieveClient(t, c, namespaceName)
 		logsList, _ := lib.WaitForPodLogs(t, c, namespaceName, pod, 2, clusterNumber, time.Duration(10)*time.Second)
-		LogsMap := lib.ValidateLogsDB(t, logsList, previousContext)
+		LogsMap := lib.ValidateLogsOnlyOneValue(t, logsList, previousContext)
 		lib.CreateFile(fmt.Sprintf("/tmp/client-cnp-%s.log", c), lib.MapToString(LogsMap))
 	}
 }
