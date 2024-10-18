@@ -50,7 +50,7 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 		}
 	}
 
-	options := k8s.NewKubectlOptions(green, "", namespaceName)
+	options := lib.NewKubectlOptions(green, namespaceName)
 	k8s.WaitUntilDeploymentAvailable(t, options, "web-app", 60, time.Duration(1)*time.Second)
 
 	for _, c := range contexts {
