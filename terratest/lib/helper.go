@@ -209,12 +209,12 @@ func GetLogsList(t *testing.T, context string, namespaceName string, pod corev1.
 	return strings.Split(logs, "\n")
 }
 
-func WaitForPodLogsNew(t *testing.T, context string, namespaceName string, pod corev1.Pod, maxRetries int, retryInterval time.Duration) ([]string, error) {
+func WaitForPodLogsNew(t *testing.T, context string, namespaceName string, pod corev1.Pod, lineNumber int, maxRetries int, retryInterval time.Duration) ([]string, error) {
 	var logsList []string
 	for i := 0; i < maxRetries; i++ {
 		logsList = GetLogsList(t, context, namespaceName, pod)
 
-		if len(logsList) > 4 {
+		if len(logsList) > lineNumber {
 			return logsList, nil
 		}
 

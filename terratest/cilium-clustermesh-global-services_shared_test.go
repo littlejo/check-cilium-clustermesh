@@ -70,7 +70,7 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	//Step Blue: Check
 	for _, c := range contexts {
 		pod := lib.RetrieveClient(t, c, namespaceName)
-		logsList, _ := lib.WaitForPodLogsNew(t, c, namespaceName, pod, clusterNumber, time.Duration(10)*time.Second)
+		logsList, _ := lib.WaitForPodLogsNew(t, c, namespaceName, pod, 10, clusterNumber, time.Duration(10)*time.Second)
 		logsMap := lib.ValidateLogsSharedStep1(t, logsList, c, []string{blue, green})
 		lib.CreateFile(fmt.Sprintf("/tmp/client-shared-blue-%s.log", c), lib.MapToString(logsMap))
 	}
