@@ -23,7 +23,7 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 	clusterNumber := len(contexts)
 
 	webAppImage := "ttl.sh/littlejo-webapp:2h"
-	webAppYAML := strings.Replace(manifests.WebAppYAML, "IMAGE", webAppImage, 1)
+	deploymentWebAppYAML := strings.Replace(manifests.DeploymentWebAppYAML, "IMAGE", webAppImage, 1)
 
 	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 
@@ -32,10 +32,11 @@ func TestCiliumClusterMeshGlobalService(t *testing.T) {
 
 		lib.CreateNamespace(t, c, namespaceName)
 		defer lib.DeleteNamespace(t, c, namespaceName)
-		defer lib.DeleteResourceToNamespace(t, c, namespaceName, webAppYAML)
+		defer lib.DeleteResourceToNamespace(t, c, namespaceName, deploymentWebAppYAML)
 
 		lib.ApplyResourceToNamespace(t, c, namespaceName, cm)
-		lib.ApplyResourceToNamespace(t, c, namespaceName, webAppYAML)
+		lib.ApplyResourceToNamespace(t, c, namespaceName, deploymentWebAppYAML)
+		lib.ApplyResourceToNamespace(t, c, namespaceName, manifests.SvcWebAppYAML)
 	}
 
 	options := k8s.NewKubectlOptions(contexts[len(contexts)-1], "", namespaceName)
