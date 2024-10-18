@@ -5,14 +5,13 @@ package test
 //./test-binary -test.v
 
 import (
+	_ "embed"
 	"fmt"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/random"
@@ -20,94 +19,60 @@ import (
 	"scripts/lib"
 )
 
+//go:embed k8s/global-load-balancing-affinity/svc-web-app.yaml
+var svcWebAppAffYAML string
+
 func TestCiliumClusterMeshGlobalServiceAffinity(t *testing.T) {
 	t.Parallel()
 
 	contexts, err := lib.GetKubeContexts(t)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	require.NoError(t, err, "Failed to get Kube contexts")
 	clusterNumber := len(contexts)
-	deploymentName := "client"
-	containerName := "client"
+	webAppImage := "ttl.sh/littlejo-webapp:2h"
+	deploymentWebAppYAML = strings.Replace(deploymentWebAppYAML, "IMAGE", webAppImage, 1)
+
+	index := 0
 
 	namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
 
 	for _, c := range contexts {
 		cm := lib.CreateConfigMapString(clusterNumber, c)
-		webResourcePath, err := filepath.Abs("../web-server/k8s/global-load-balancing-affinity/web-app.yaml")
-		require.NoError(t, err)
-
-		options := k8s.NewKubectlOptions(c, "", namespaceName)
-
-		k8s.CreateNamespace(t, options, namespaceName)
-		defer k8s.DeleteNamespace(t, options, namespaceName)
-		defer k8s.KubectlDelete(t, options, webResourcePath)
-
-		k8s.KubectlApplyFromString(t, options, cm)
-		k8s.KubectlApply(t, options, webResourcePath)
+		lib.CreateNamespace(t, c, namespaceName)
+		lib.ApplyResourceToNamespace(t, c, namespaceName, cm)
+		lib.ApplyResourceToNamespace(t, c, namespaceName, svcWebAppAffYAML)
+		lib.ApplyResourceToNamespace(t, c, namespaceName, deploymentWebAppYAML)
+		defer lib.DeleteNamespace(t, c, namespaceName)
+		defer lib.DeleteResourceToNamespace(t, c, namespaceName, svcWebAppAffYAML)
 	}
 
 	options := k8s.NewKubectlOptions(contexts[len(contexts)-1], "", namespaceName)
 	k8s.WaitUntilDeploymentAvailable(t, options, "web-app", 60, time.Duration(1)*time.Second)
 
 	for _, c := range contexts {
-		clientResourcePath, err := filepath.Abs("../web-server/k8s/common/client.yaml")
-		require.NoError(t, err)
-
-		options := k8s.NewKubectlOptions(c, "", namespaceName)
-
-		defer k8s.KubectlDelete(t, options, clientResourcePath)
-
-		k8s.KubectlApply(t, options, clientResourcePath)
+		defer lib.DeleteResourceToNamespace(t, c, namespaceName, clientYAML)
+		lib.ApplyResourceToNamespace(t, c, namespaceName, clientYAML)
 	}
 
+	//Step 1: Check Local Affinity
 	for _, c := range contexts {
-		options := k8s.NewKubectlOptions(c, "", namespaceName)
-		filters := metav1.ListOptions{
-			LabelSelector: "app=client",
-		}
-		k8s.WaitUntilDeploymentAvailable(t, options, deploymentName, 60, time.Duration(1)*time.Second)
-		pod := k8s.ListPods(t, options, filters)[0]
-		lib.WaitForPodLogs(t, options, pod.Name, containerName, clusterNumber, time.Duration(10)*time.Second)
-		logs := k8s.GetPodLogs(t, options, &pod, containerName)
-		logsList := strings.Split(logs, "\n")
-		LogsMap := lib.Uniq(logsList)
-		t.Log("context:", c)
-		t.Log("Value of logs is:", lib.MapToString(LogsMap))
-		require.Equal(t, len(LogsMap), 1)
-		require.Contains(t, logsList, c)
+		pod := lib.RetrieveClient(t, c, namespaceName)
+		logsList, _ := lib.WaitForPodLogsNew(t, c, namespaceName, pod, 10, clusterNumber, time.Duration(10)*time.Second)
+		lib.ValidateLogsDB(t, logsList, c)
 	}
 
-	options = k8s.NewKubectlOptions(contexts[0], "", namespaceName)
-	webResourceDeletePath, err := filepath.Abs("../web-server/k8s/global-load-balancing-affinity/web-app-delete.yaml")
-	k8s.KubectlApply(t, options, webResourceDeletePath)
-	filters := metav1.ListOptions{
-		LabelSelector: "app=client",
-	}
-	pod := k8s.ListPods(t, options, filters)[0]
+	lib.DeleteResourceToNamespace(t, contexts[index], namespaceName, deploymentWebAppYAML)
+	pod := lib.RetrieveClient(t, contexts[index], namespaceName)
+	lib.WaitForPodAllClustersLogsNew(t, contexts[index], namespaceName, pod, contexts, clusterNumber, time.Duration(10)*time.Second)
 
-	lib.WaitForPodAllClustersLogs(t, options, pod.Name, containerName, contexts, clusterNumber, time.Duration(10)*time.Second)
-
-	for i, c := range contexts {
-		options := k8s.NewKubectlOptions(c, "", namespaceName)
-		filters := metav1.ListOptions{
-			LabelSelector: "app=client",
+	//Step 2: Check Local Affinity with one failure
+	for _, c := range contexts {
+		pod := lib.RetrieveClient(t, c, namespaceName)
+		logsList, _ := lib.WaitForPodLogsNew(t, c, namespaceName, pod, 10, clusterNumber, time.Duration(10)*time.Second)
+		if c != contexts[index] {
+			lib.ValidateLogsDB(t, logsList, c)
+		} else {
+			logsMap := lib.ValidateLogsGlobalServices(t, logsList, contexts)
+			lib.CreateFile(fmt.Sprintf("/tmp/client-affinity-%s.log", c), lib.MapToString(logsMap))
 		}
-		pod := k8s.ListPods(t, options, filters)[0]
-		logs := k8s.GetPodLogs(t, options, &pod, containerName)
-		logsList := strings.Split(logs, "\n")
-		LogsMap := lib.Uniq(logsList)
-		contextsAnalyze := contexts
-		lib.CreateFile(fmt.Sprintf("/tmp/client-affinity-%s.log", c), lib.MapToString(LogsMap))
-		if i != 0 {
-			contextsAnalyze = []string{c}
-		}
-		for _, c := range contextsAnalyze {
-			require.Contains(t, logsList, c)
-		}
-		t.Log("Value of pod name is:", pod.Name)
-		t.Log("Value of logs is:", lib.MapToString(LogsMap))
 	}
 }
