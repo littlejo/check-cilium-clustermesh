@@ -134,14 +134,14 @@ func MapToString(m map[string]int) string {
 }
 
 func ApplyResourceToNamespace(t *testing.T, context string, namespaceName string, manifest string) {
-	resourcesMap, err := ParseYAMLResources(manifest)
-	if err != nil {
-		fmt.Println("Error parsing YAML:", err)
-		return
-	}
-	for resource, name := range resourcesMap {
-		Log(t, context, "✨ Creating "+resource+" "+name)
-	}
+	//resourcesMap, err := ParseYAMLResources(manifest)
+	//if err != nil {
+	//	fmt.Println("Error parsing YAML:", err)
+	//	return
+	//}
+	//for resource, name := range resourcesMap {
+	//	Log(t, context, "✨ Creating "+resource+" "+name)
+	//}
 	options := NewKubectlOptions(context, namespaceName)
 	k8s.KubectlApplyFromString(t, options, manifest)
 }
@@ -152,7 +152,7 @@ func DeleteResourceToNamespace(t *testing.T, context string, namespaceName strin
 }
 
 func CreateNamespace(t *testing.T, context string, namespaceName string) {
-	Log(t, context, "✨ Creating namespace "+namespaceName)
+	//Log(t, context, "✨ Creating namespace "+namespaceName)
 	options := NewKubectlOptions(context, namespaceName)
 	k8s.CreateNamespace(t, options, namespaceName)
 }
@@ -247,6 +247,6 @@ func WaitForPodAllClustersLogs(t *testing.T, context string, namespaceName strin
 	return logsList, fmt.Errorf("Impossible to retrieve after %d tries", maxRetries)
 }
 
-func Log(t *testing.T, context string, message string) {
-	t.Logf("[%s] [%s] %s", t.Name(), context, message)
-}
+//func Log(t *testing.T, context string, message string) {
+//	t.Logf("[%s] [%s] %s", t.Name(), context, message)
+//}
