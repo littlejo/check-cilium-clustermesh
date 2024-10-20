@@ -86,6 +86,7 @@ func TestCiliumClusterMeshGlobalServiceShared(t *testing.T) {
 	//Step Green: Check
 	for _, c := range contexts {
 		pod := lib.RetrieveClient(t, c, namespaceName)
+		//TOFIX: you have to wait more time
 		logsList, err := lib.WaitForPodAllClustersLogs(t, c, namespaceName, pod, blueGreenContexts, clusterNumber, time.Duration(10)*time.Second)
 		require.NoError(t, err, "Error waiting for pod logs in context: %s", c)
 		endLogsList := logsList[indexes[c]:]
