@@ -1,0 +1,22 @@
+project_name: terratest
+
+builds:
+  - id: test-binary
+    main: ./ # Vous pouvez aussi spécifier un chemin vers votre dossier de tests
+    binary: test-binary
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags: ""
+    flags: 
+      - test
+      - -c
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
