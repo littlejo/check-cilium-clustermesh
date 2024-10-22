@@ -10,8 +10,7 @@ on:
   pull_request:
     paths:
     - 'web-server/docker/*'
-    paths-ignore:
-      - '*/README.md'
+
 jobs:
   build-test:
     name: Docker Build
