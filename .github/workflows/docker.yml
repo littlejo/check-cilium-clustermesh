@@ -1,6 +1,6 @@
 name: Dockerbuild
 env:
-  WEBAPP_IMAGE: "littlejo83/webapp:0.1"
+  WEBAPP_IMAGE: "quay.io/littlejo83/webapp:0.1"
 on:
   push:
     branches:
