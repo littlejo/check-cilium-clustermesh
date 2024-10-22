@@ -1,4 +1,4 @@
-name: Pulumi
+name: Dockerbuild
 env:
   WEBAPP_IMAGE: "ttl.sh/littlejo-webapp:2h"
 on:
@@ -23,5 +23,5 @@ jobs:
 
     - name: Docker build
       run: |
-        cd check-cilium-clustermesh/web-server/docker/
+        cd web-server/docker/
         docker buildx build --platform linux/arm64,linux/amd64 -t $WEBAPP_IMAGE --push .
