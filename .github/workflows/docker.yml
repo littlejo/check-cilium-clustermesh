@@ -1,0 +1,27 @@
+name: Pulumi
+env:
+  WEBAPP_IMAGE: "ttl.sh/littlejo-webapp:2h"
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths-ignore:
+      - '*/README.md'
+jobs:
+  build-test:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4#
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Docker build
+      run: |
+        cd check-cilium-clustermesh/web-server/docker/
+        docker buildx build --platform linux/arm64,linux/amd64 -t $WEBAPP_IMAGE --push .
