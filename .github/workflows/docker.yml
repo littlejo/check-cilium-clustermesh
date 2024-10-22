@@ -7,9 +7,11 @@ on:
       - main
     paths:
     - 'web-server/docker/*'
+    - '.github/workflows/docker.yml'
   pull_request:
     paths:
     - 'web-server/docker/*'
+    - '.github/workflows/docker.yml'
 
 jobs:
   build-test:
