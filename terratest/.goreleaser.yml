@@ -1,9 +1,10 @@
+version: 2
+
 project_name: terratest
 
 builds:
   - id: test-binary
-    main: ./...
-    binary: test-binary
+    no_main_check: true
     goos:
       - linux
       - darwin
@@ -13,8 +14,10 @@ builds:
       - arm64
     ldflags: ""
     flags:
-      - test
       - -c
+      - -o
+    command: test
+    binary: check-cilium-clustermesh
 
 archives:
   - format: tar.gz
