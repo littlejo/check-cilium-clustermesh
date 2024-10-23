@@ -6,22 +6,28 @@ kubectl config get-contexts -o name > $ctx
 clusters_n=$(cat $ctx | wc -l | awk '{print $1}')
 python=python3
 
+dir=/tmp/clustermesh
+
 for c in $(cat $ctx)
 do
-	cilium status --wait --context $c > /tmp/$c-cilium-status.log
-	cilium clustermesh status --wait --context $c > /tmp/$c-cilium-clustermesh-status.log
+	mkdir -p $dir/$c
 done
 
 for c in $(cat $ctx)
 do
-	cilium status -o json --context $c > /tmp/$c-cilium-status.json
-	$python ./cilium-status.py /tmp/$c-cilium-status.json $clusters_n
-	cilium clustermesh status -o json --context $c > /tmp/$c-cilium-clustermesh-status-connectivity.json
-	$python ./cilium-clustermesh-status.py /tmp/$c-cilium-clustermesh-status-connectivity.json $clusters_n
+	cilium status --wait --context $c > $dir/$c/cilium-status.log
+	cilium clustermesh status --wait --context $c > $dir/$c/cilium-clustermesh-status.log
 done
 
-#TOFIX odd number
-#cat $ctx | xargs -n 2 -P 4 bash -c 'cilium connectivity test --context $0 --multi-cluster $1 | tee /tmp/$0-$1-connectivity-test.log'
-#
-##TOFIX odd number
-cat $ctx | xargs -P 4 -I {} bash -c 'cilium sysdump --output-filename {} --context {}
+for c in $(cat $ctx)
+do
+	cilium status -o json --context $c > $dir/$c/cilium-status.json
+	$python ./cilium-status.py $dir/$c/cilium-status.json $clusters_n | tee $dir/$c/cilium-status-json.log
+	cilium clustermesh status -o json --context $c > $dir/$c/cilium-clustermesh-status-connectivity.json
+	$python ./cilium-clustermesh-status.py $dir/$c/cilium-clustermesh-status-connectivity.json $clusters_n | tee $dir/$c/cilium-clustermesh-status-connectivity-json.log
+done
+
+cat $ctx | xargs -P $clusters_n -I {} bash -c "cilium connectivity test --context {} | tee $dir/{}/connectivity-test.log"
+cat $ctx | xargs -P $clusters_n -I {} bash -c "cilium sysdump --output-filename $dir/{} --context {}"
+
+check-cilium-clustermesh -test.v | tee $dir/terratest.log
