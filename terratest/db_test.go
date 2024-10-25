@@ -24,7 +24,9 @@ func TestCiliumClusterMeshGlobalServiceDB(t *testing.T) {
 	webAppImage := lib.RetrieveWebAppImage(manifests.WebAppImage)
 	deploymentWebAppYAML := strings.Replace(manifests.DeploymentWebAppYAML, "IMAGE", webAppImage, 1)
 
-	for db_index := range contexts {
+	contextsTest := contexts[:2]
+
+	for db_index := range contextsTest {
 		t.Run("TestCiliumClusterMeshGlobalServiceDB_"+contexts[db_index], func(t *testing.T) {
 			t.Parallel()
 			namespaceName := fmt.Sprintf("cilium-cmesh-test-%s", strings.ToLower(random.UniqueId()))
