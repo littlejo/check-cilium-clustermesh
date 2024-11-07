@@ -15,8 +15,8 @@ done
 
 for c in $(cat $ctx)
 do
-	cilium status --wait --context $c > $dir/$c/cilium-status.log
-	cilium clustermesh status --wait --context $c > $dir/$c/cilium-clustermesh-status.log
+	cilium status --wait --context $c | tee $dir/$c/cilium-status.log
+	cilium clustermesh status --wait --context $c | tee $dir/$c/cilium-clustermesh-status.log
 done
 
 for c in $(cat $ctx)
