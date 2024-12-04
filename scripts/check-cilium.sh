@@ -27,8 +27,8 @@ do
 	cilium-clustermesh-status.py $dir/$c/cilium-clustermesh-status-connectivity.json $clusters_n | tee $dir/$c/cilium-clustermesh-status-connectivity-json.log
 done
 
-cat $ctx | xargs -P $clusters_n -I {} bash -c "cilium sysdump --output-filename $dir/{} --context {}"
+GOMAXPROCS=4 check-cilium-clustermesh -test.v | tee $dir/terratest.log
 
-GOMAXPROCS=16 check-cilium-clustermesh -test.v | tee $dir/terratest.log
+cat $ctx | xargs -P 73 -I {} bash -c "cilium sysdump --output-filename $dir/{} --context {}"
 
-cat $ctx | xargs -P $clusters_n -I {} bash -c "cilium connectivity test --context {} | tee $dir/{}/connectivity-test.log"
+cat $ctx | xargs -P 73 -I {} bash -c "cilium connectivity test --context {} | tee $dir/{}/connectivity-test.log"
